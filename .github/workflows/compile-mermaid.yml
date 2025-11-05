@@ -15,6 +15,16 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Check mermaid.md exists
+        run: |
+          if [ ! -f "docs/mermaid.md" ]; then
+            echo "Error: docs/mermaid.md not found"
+            exit 1
+          fi
+          echo "Found docs/mermaid.md"
+          echo "File content preview:"
+          head -20 docs/mermaid.md
+
       - name: Compile Mermaid
         uses: neenjaw/compile-mermaid-markdown-action@0.3.1
         with:
@@ -25,16 +35,21 @@ jobs:
           ABSOLUTE_IMAGE_LINKS: 1
           OUTPUT_FILE_TYPE: "svg"
 
-      - name: Organize SVG files
+      - name: Verify SVG files generated
         run: |
           # Ensure .resources/mermaid directory exists
           mkdir -p .resources/mermaid
           
-          # The action generates files with names like: mermaid-diagram-0.svg, mermaid-diagram-1.svg, etc.
-          # This ensures they're always in the same location: .resources/mermaid/
-          # Files are named based on the markdown file (mermaid.md) and diagram index
-          echo "Mermaid diagrams compiled to .resources/mermaid/"
-          ls -la .resources/mermaid/ || echo "No diagrams generated yet"
+          echo "Checking for generated SVG files..."
+          if ls .resources/mermaid/*.svg 1> /dev/null 2>&1; then
+            echo "✅ SVG files found:"
+            ls -lh .resources/mermaid/*.svg
+          else
+            echo "❌ No SVG files found in .resources/mermaid/"
+            echo "Directory contents:"
+            ls -la .resources/mermaid/ || echo "Directory is empty or doesn't exist"
+            exit 1
+          fi
 
       - name: Show changes
         run: |
@@ -54,6 +69,6 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          branch: ${{ github.ref_name }}
           force: false
 

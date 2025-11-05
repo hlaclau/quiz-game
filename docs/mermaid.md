@@ -1,3 +1,6 @@
+# Architecture Diagram
+
+```mermaid
 graph TB
   subgraph Users
     AU[Authenticated User<br/>Creates & manages quizzes]
@@ -22,3 +25,4 @@ graph TB
   style WF fill:#6c7086,stroke:#6c7086,color:#cdd6f4
   style QA fill:#89dceb,stroke:#89dceb,color:#1e1e2e
   style DB fill:#585b70,stroke:#585b70,color:#cdd6f4
+```
