@@ -1,0 +1,12 @@
+{
+  "name": "ynov-quiz-project",
+  "version": "1.0.0",
+  "description": "Quiz project for Architecture course",
+  "scripts": {
+    "mermaid": "mmdc -i docs/mermaid.md -o .resources/mermaid/mermaid-diagram-0.svg -b transparent -w 1200 -H 800",
+    "mermaid:watch": "mmdc -i docs/mermaid.md -o .resources/mermaid/mermaid-diagram-0.svg -b transparent -w 1200 -H 800 -w"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.12.0"
+  }
+}

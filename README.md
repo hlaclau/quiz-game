@@ -1,5 +1,7 @@
 # Quiz project for the course: Architecture logicielle & design patterns @Ynov
 
-## Architecture Diagram
+## Architecture Diagrams
 
-<img src=".resources/mermaid/docs_mermaid-md-1.svg" alt="Architecture Diagram" />
+### System Context Diagram
+
+![System Context Diagram](.resources/mermaid/system-context-diagram.svg)
