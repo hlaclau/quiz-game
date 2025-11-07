@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
@@ -7,14 +7,13 @@ WORKDIR /app
 COPY package.json bun.lock* ./
 
 # Install dependencies
-# Using npm since we're in Docker, but you can use bun if preferred
-RUN npm ci --legacy-peer-deps || npm install
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN bun run build
 
 # Production stage
 FROM nginx:alpine
