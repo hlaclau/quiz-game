@@ -26,6 +26,7 @@ func main() {
 	// Initialize database connection
 	ctx := context.Background()
 	dbConn, err := postgres.NewConnection(ctx, cfg.Database.URL)
+	log.Printf("Database URL: %s", cfg.Database.URL)
 	if err != nil {
 		log.Printf("Warning: Failed to connect to database: %v", err)
 		log.Println("Continuing without database connection...")
