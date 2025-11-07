@@ -35,8 +35,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: api/Dockerfile
+      context: ..
+      dockerfile: ../api/Dockerfile
     container_name: quiz_api
     environment:
       PORT: ${PORT:-8080}
