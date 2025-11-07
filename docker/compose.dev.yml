@@ -23,8 +23,8 @@ services:
 
   api:
     build:
-      context: ..
-      dockerfile: ../api/Dockerfile
+      context: ../api
+      dockerfile: Dockerfile
     container_name: quiz_api
     environment:
       PORT: 8080
