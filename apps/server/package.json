@@ -1,27 +1,27 @@
 {
-  "name": "server",
-  "main": "src/index.ts",
-  "type": "module",
-  "scripts": {
-    "build": "tsdown",
-    "check-types": "tsc -b",
-    "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "bun run --hot src/index.ts",
-    "start": "bun run dist/index.js"
-  },
-  "dependencies": {
-    "elysia": "^1.3.21",
-    "@elysiajs/cors": "^1.3.3",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "^4.1.11",
-    "@quiz-game/auth": "workspace:*",
-    "@quiz-game/db": "workspace:*"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.2",
-    "@types/bun": "^1.2.6",
-    "tsdown": "^0.16.5",
-    "@quiz-game/config": "workspace:*"
-  }
+	"name": "server",
+	"main": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"build": "tsdown",
+		"check-types": "tsc -b",
+		"compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
+		"dev": "bun run --hot src/index.ts",
+		"start": "bun run dist/index.js"
+	},
+	"dependencies": {
+		"elysia": "^1.3.21",
+		"@elysiajs/cors": "^1.3.3",
+		"better-auth": "catalog:",
+		"dotenv": "catalog:",
+		"zod": "^4.1.11",
+		"@quiz-game/auth": "workspace:*",
+		"@quiz-game/db": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "^5.8.2",
+		"@types/bun": "^1.2.6",
+		"tsdown": "^0.16.5",
+		"@quiz-game/config": "workspace:*"
+	}
 }

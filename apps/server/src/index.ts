@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { auth } from "@quiz-game/auth";
+import { Elysia } from "elysia";
 
 const app = new Elysia()
 	.use(

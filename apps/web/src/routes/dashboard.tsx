@@ -1,5 +1,5 @@
-import { getUser } from "@/functions/get-user";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getUser } from "@/functions/get-user";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
