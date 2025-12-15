@@ -57,8 +57,8 @@ quiz-game/
 │   ├── web/         # Frontend application (React + TanStack Start)
 │   └── server/      # Backend API (Elysia)
 ├── packages/
-│   ├── api/         # API layer / business logic
 │   ├── auth/        # Authentication configuration & logic
+│   ├── config/      # Configuration files
 │   └── db/          # Database schema & queries
 ```
 
