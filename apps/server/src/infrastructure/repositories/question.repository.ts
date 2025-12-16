@@ -17,90 +17,62 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 	constructor(private readonly db: Database) {}
 
 	async create(input: CreateQuestionInput): Promise<Question> {
-		console.log("[QuestionRepository] Starting create...");
-		console.log("[QuestionRepository] Input:", JSON.stringify(input, null, 2));
-
 		const questionId = crypto.randomUUID();
 		const now = new Date();
 
-		console.log("[QuestionRepository] Generated questionId:", questionId);
+		const result = await this.db.transaction(async (tx) => {
+			const rows = await tx
+				.insert(questionTable)
+				.values({
+					id: questionId,
+					content: input.content,
+					explanation: input.explanation,
+					difficultyId: input.difficultyId,
+					themeId: input.themeId,
+					authorId: input.authorId,
+					createdAt: now,
+					updatedAt: now,
+				})
+				.returning();
 
-		try {
-			const result = await this.db.transaction(async (tx) => {
-				console.log("[QuestionRepository] Inserting question...");
-				const rows = await tx
-					.insert(questionTable)
-					.values({
-						id: questionId,
-						content: input.content,
-						explanation: input.explanation,
-						difficultyId: input.difficultyId,
-						themeId: input.themeId,
-						authorId: input.authorId,
-						createdAt: now,
-						updatedAt: now,
-					})
-					.returning();
+			const row = rows[0];
+			if (!row) {
+				throw new Error("Failed to create question");
+			}
 
-				console.log(
-					"[QuestionRepository] Question inserted, rows:",
-					rows.length,
-				);
+			// Insert answers
+			await tx.insert(answerTable).values(
+				input.answers.map((a) => ({
+					id: crypto.randomUUID(),
+					content: a.content,
+					isCorrect: a.isCorrect,
+					questionId,
+					createdAt: now,
+				})),
+			);
 
-				const row = rows[0];
-				if (!row) {
-					throw new Error("Failed to create question");
-				}
-
-				// Insert answers
-				console.log(
-					"[QuestionRepository] Inserting answers...",
-					input.answers.length,
-				);
-				await tx.insert(answerTable).values(
-					input.answers.map((a) => ({
-						id: crypto.randomUUID(),
-						content: a.content,
-						isCorrect: a.isCorrect,
+			// Insert tags if provided
+			if (input.tagIds && input.tagIds.length > 0) {
+				await tx.insert(questionTagTable).values(
+					input.tagIds.map((tagId) => ({
 						questionId,
-						createdAt: now,
+						tagId,
 					})),
 				);
-				console.log("[QuestionRepository] Answers inserted");
+			}
 
-				// Insert tags if provided
-				if (input.tagIds && input.tagIds.length > 0) {
-					console.log(
-						"[QuestionRepository] Inserting tags...",
-						input.tagIds.length,
-					);
-					await tx.insert(questionTagTable).values(
-						input.tagIds.map((tagId) => ({
-							questionId,
-							tagId,
-						})),
-					);
-					console.log("[QuestionRepository] Tags inserted");
-				}
+			return row;
+		});
 
-				return row;
-			});
-
-			console.log("[QuestionRepository] Transaction completed successfully");
-
-			return Question.create({
-				id: result.id,
-				content: result.content,
-				explanation: result.explanation,
-				difficultyId: result.difficultyId,
-				themeId: result.themeId,
-				authorId: result.authorId,
-				createdAt: result.createdAt,
-				updatedAt: result.updatedAt,
-			});
-		} catch (error) {
-			console.error("[QuestionRepository] Error:", error);
-			throw error;
-		}
+		return Question.create({
+			id: result.id,
+			content: result.content,
+			explanation: result.explanation,
+			difficultyId: result.difficultyId,
+			themeId: result.themeId,
+			authorId: result.authorId,
+			createdAt: result.createdAt,
+			updatedAt: result.updatedAt,
+		});
 	}
 }

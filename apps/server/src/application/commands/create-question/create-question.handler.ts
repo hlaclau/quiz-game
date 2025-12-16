@@ -1,4 +1,4 @@
-import type { Question } from "../../../domain/entities/question";
+import { Question } from "../../../domain/entities/question";
 import type { IQuestionRepository } from "../../../domain/interfaces/question-repository.interface";
 import type { QuestionDTO } from "../../dtos/question.dto";
 import type { CreateQuestionRequest } from "./create-question.request";
@@ -30,35 +30,21 @@ export class CreateQuestionHandler {
 	async execute(
 		request: CreateQuestionRequest,
 	): Promise<CreateQuestionResponse> {
-		console.log("[CreateQuestionHandler] Starting execute...");
-		console.log(
-			"[CreateQuestionHandler] Request received:",
-			JSON.stringify(request, null, 2),
-		);
+		// Validate domain rules
+		Question.validateAnswersCount(request.answers.length);
 
-		try {
-			console.log("[CreateQuestionHandler] Calling repository.create...");
-			const question = await this.questionRepository.create({
-				content: request.content,
-				explanation: request.explanation ?? null,
-				difficultyId: request.difficultyId,
-				themeId: request.themeId,
-				authorId: request.authorId,
-				answers: request.answers,
-				tagIds: request.tagIds,
-			});
+		const question = await this.questionRepository.create({
+			content: request.content,
+			explanation: request.explanation ?? null,
+			difficultyId: request.difficultyId,
+			themeId: request.themeId,
+			authorId: request.authorId,
+			answers: request.answers,
+			tagIds: request.tagIds,
+		});
 
-			console.log(
-				"[CreateQuestionHandler] Question created successfully:",
-				question.id,
-			);
-
-			return {
-				data: toDTO(question),
-			};
-		} catch (error) {
-			console.error("[CreateQuestionHandler] Error:", error);
-			throw error;
-		}
+		return {
+			data: toDTO(question),
+		};
 	}
 }
