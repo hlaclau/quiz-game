@@ -2,11 +2,11 @@ import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
+import { Loader } from "@/components/shared";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import Loader from "./loader";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 
 export default function SignInForm({
 	onSwitchToSignUp,
@@ -80,7 +80,7 @@ export default function SignInForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-destructive">
 										{error?.message}
 									</p>
 								))}
@@ -103,7 +103,7 @@ export default function SignInForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-destructive">
 										{error?.message}
 									</p>
 								))}
@@ -129,7 +129,7 @@ export default function SignInForm({
 				<Button
 					variant="link"
 					onClick={onSwitchToSignUp}
-					className="text-indigo-600 hover:text-indigo-800"
+					className="text-primary hover:text-primary/80"
 				>
 					Need an account? Sign Up
 				</Button>
