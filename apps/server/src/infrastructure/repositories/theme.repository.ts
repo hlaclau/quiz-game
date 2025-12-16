@@ -1,4 +1,4 @@
-import { eq, type Database } from "@quiz-game/db";
+import { type Database, eq } from "@quiz-game/db";
 import { theme as themeTable } from "@quiz-game/db/schema/index";
 import { Theme } from "../../domain/entities/theme";
 import type { IThemeRepository } from "../../domain/interfaces/theme-repository.interface";

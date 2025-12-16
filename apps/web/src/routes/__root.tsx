@@ -5,8 +5,8 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Header } from "@/components/layout";
 import { Toaster } from "@/components/ui/sonner";
-import Header from "../components/header";
 import appCss from "../index.css?url";
 
 export type RouterAppContext = {};
@@ -43,9 +43,11 @@ function RootDocument() {
 				<HeadContent />
 			</head>
 			<body>
-				<div className="grid h-svh grid-rows-[auto_1fr]">
+				<div className="flex min-h-svh flex-col">
 					<Header />
-					<Outlet />
+					<main className="flex-1">
+						<Outlet />
+					</main>
 				</div>
 				<Toaster richColors />
 				<TanStackRouterDevtools position="bottom-left" />

@@ -1,6 +1,6 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { useThemes } from "@/hooks/use-themes";
 import { ThemeCard } from "./theme-card";
-import { Skeleton } from "./ui/skeleton";
 
 export function ThemeList() {
 	const { data, isLoading, error } = useThemes();
