@@ -4,18 +4,32 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-provider";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 import UserMenu from "./user-menu";
 
-const links = [
+type NavLink = {
+	to: string;
+	label: string;
+	authRequired?: boolean;
+};
+
+const publicLinks: NavLink[] = [
 	{ to: "/", label: "Home" },
-	{ to: "/dashboard", label: "Dashboard" },
-] as const;
+	{ to: "/submit-question", label: "Submit Question" },
+];
+
+const authLinks: NavLink[] = [
+	{ to: "/dashboard", label: "Dashboard", authRequired: true },
+];
 
 export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const location = useLocation();
+	const { isAuthenticated } = useAuth();
+
+	const visibleLinks = [...publicLinks, ...(isAuthenticated ? authLinks : [])];
 
 	return (
 		<header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
@@ -36,7 +50,7 @@ export default function Header() {
 
 					{/* Desktop Navigation */}
 					<nav className="hidden items-center gap-1 md:flex">
-						{links.map(({ to, label }) => {
+						{visibleLinks.map(({ to, label }) => {
 							const isActive = location.pathname === to;
 							return (
 								<Link
@@ -84,7 +98,7 @@ export default function Header() {
 			{mobileMenuOpen && (
 				<div className="border-t border-border/40 bg-background/95 backdrop-blur-xl md:hidden">
 					<nav className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4">
-						{links.map(({ to, label }) => {
+						{visibleLinks.map(({ to, label }) => {
 							const isActive = location.pathname === to;
 							return (
 								<Link

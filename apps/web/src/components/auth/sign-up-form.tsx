@@ -49,7 +49,7 @@ export default function SignUpForm({
 				{
 					onSuccess: () => {
 						navigate({
-							to: "/dashboard",
+							to: "/",
 						});
 						toast.success("Sign up successful");
 					},
@@ -80,7 +80,7 @@ export default function SignUpForm({
 		setIsDiscordLoading(true);
 		await authClient.signIn.social({
 			provider: "discord",
-			callbackURL: `${window.location.origin}/dashboard`,
+			callbackURL: `${window.location.origin}/`,
 		});
 	};
 
