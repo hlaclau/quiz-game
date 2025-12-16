@@ -1,5 +1,21 @@
+import type { Theme } from "../../../domain/entities/theme";
 import type { IThemeRepository } from "../../../domain/interfaces/theme-repository.interface";
+import type { ThemeDTO } from "../../dtos/theme.dto";
 import type { GetThemesResponse } from "./get-themes.response";
+
+/**
+ * Maps a Theme entity to a ThemeDTO
+ */
+function toDTO(theme: Theme): ThemeDTO {
+	return {
+		id: theme.id,
+		name: theme.name,
+		description: theme.description,
+		color: theme.color,
+		createdAt: theme.createdAt.toISOString(),
+		updatedAt: theme.updatedAt.toISOString(),
+	};
+}
 
 /**
  * GetThemes Query Handler
@@ -10,7 +26,7 @@ export class GetThemesHandler {
 
 	async execute(): Promise<GetThemesResponse> {
 		const themes = await this.themeRepository.findAll();
-		const data = themes.map((theme) => theme.toJSON());
+		const data = themes.map(toDTO);
 
 		return {
 			data,

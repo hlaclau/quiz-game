@@ -41,15 +41,4 @@ export class Theme {
 	get updatedAt(): Date {
 		return this.props.updatedAt;
 	}
-
-	toJSON() {
-		return {
-			id: this.id,
-			name: this.name,
-			description: this.description,
-			color: this.color,
-			createdAt: this.createdAt.toISOString(),
-			updatedAt: this.updatedAt.toISOString(),
-		};
-	}
 }
