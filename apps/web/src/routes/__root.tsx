@@ -5,6 +5,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { ThemeProvider } from "next-themes";
 import { Header } from "@/components/layout";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../index.css?url";
@@ -22,7 +23,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "My App",
+				title: "QuizApp - Test Your Knowledge",
 			},
 		],
 		links: [
@@ -38,18 +39,25 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
 	return (
-		<html lang="en" className="dark">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				<div className="flex min-h-svh flex-col">
-					<Header />
-					<main className="flex-1">
-						<Outlet />
-					</main>
-				</div>
-				<Toaster richColors />
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="dark"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<div className="flex min-h-svh flex-col">
+						<Header />
+						<main className="flex-1">
+							<Outlet />
+						</main>
+					</div>
+					<Toaster richColors />
+				</ThemeProvider>
 				<TanStackRouterDevtools position="bottom-left" />
 				<Scripts />
 			</body>

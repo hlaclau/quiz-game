@@ -1,33 +1,113 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import { Link, useLocation } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./theme-toggle";
 import UserMenu from "./user-menu";
 
+const links = [
+	{ to: "/", label: "Home" },
+	{ to: "/dashboard", label: "Dashboard" },
+] as const;
+
 export default function Header() {
-	const links = [
-		{ to: "/", label: "Home" },
-		{ to: "/dashboard", label: "Dashboard" },
-	] as const;
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const location = useLocation();
 
 	return (
-		<header className="border-border/50 border-b bg-background/80 backdrop-blur-sm">
+		<header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
 			<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+				{/* Logo & Nav */}
 				<div className="flex items-center gap-8">
-					<Link to="/" className="font-bold text-foreground text-xl">
-						Quiz<span className="text-violet-500">App</span>
+					<Link
+						to="/"
+						className="group flex items-center gap-1.5 font-bold text-xl"
+					>
+						<div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-sm text-white shadow-lg shadow-violet-500/25 transition-shadow group-hover:shadow-violet-500/40">
+							Q
+						</div>
+						<span className="text-foreground">
+							Quiz<span className="text-violet-500">App</span>
+						</span>
 					</Link>
-					<nav className="hidden gap-6 md:flex">
-						{links.map(({ to, label }) => (
-							<Link
-								key={to}
-								to={to}
-								className="text-muted-foreground text-sm transition-colors hover:text-foreground"
-							>
-								{label}
-							</Link>
-						))}
+
+					{/* Desktop Navigation */}
+					<nav className="hidden items-center gap-1 md:flex">
+						{links.map(({ to, label }) => {
+							const isActive = location.pathname === to;
+							return (
+								<Link
+									key={to}
+									to={to}
+									className={cn(
+										"rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+										isActive
+											? "bg-violet-500/10 text-violet-500"
+											: "text-muted-foreground hover:bg-muted hover:text-foreground",
+									)}
+								>
+									{label}
+								</Link>
+							);
+						})}
 					</nav>
 				</div>
-				<UserMenu />
+
+				{/* Right side */}
+				<div className="flex items-center gap-2">
+					<ThemeToggle />
+
+					<div className="hidden md:block">
+						<UserMenu />
+					</div>
+
+					{/* Mobile menu button */}
+					<Button
+						variant="ghost"
+						size="icon"
+						className="size-9 md:hidden"
+						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+					>
+						{mobileMenuOpen ? (
+							<X className="size-5" />
+						) : (
+							<Menu className="size-5" />
+						)}
+					</Button>
+				</div>
 			</div>
+
+			{/* Mobile Navigation */}
+			{mobileMenuOpen && (
+				<div className="border-t border-border/40 bg-background/95 backdrop-blur-xl md:hidden">
+					<nav className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4">
+						{links.map(({ to, label }) => {
+							const isActive = location.pathname === to;
+							return (
+								<Link
+									key={to}
+									to={to}
+									onClick={() => setMobileMenuOpen(false)}
+									className={cn(
+										"rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+										isActive
+											? "bg-violet-500/10 text-violet-500"
+											: "text-muted-foreground hover:bg-muted hover:text-foreground",
+									)}
+								>
+									{label}
+								</Link>
+							);
+						})}
+						<div className="mt-2 border-t border-border/40 pt-4">
+							<UserMenu />
+						</div>
+					</nav>
+				</div>
+			)}
 		</header>
 	);
 }
