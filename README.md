@@ -72,3 +72,135 @@ quiz-game/
 - `bun run db:push`: Push schema changes to database
 - `bun run db:studio`: Open database studio UI
 - `bun run check`: Run Biome formatting and linting
+
+Database Schema for dbdiagram.io:
+```
+// ==========================================
+// AUTHENTICATION TABLES (Better Auth)
+// ==========================================
+
+Table user {
+  id text [pk]
+  name text [not null]
+  email text [not null, unique]
+  email_verified boolean [not null, default: false]
+  image text
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+}
+
+Table session {
+  id text [pk]
+  expires_at timestamp [not null]
+  token text [not null, unique]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+  ip_address text
+  user_agent text
+  user_id text [not null, ref: > user.id]
+
+  indexes {
+    user_id
+  }
+}
+
+Table account {
+  id text [pk]
+  account_id text [not null]
+  provider_id text [not null]
+  user_id text [not null, ref: > user.id]
+  access_token text
+  refresh_token text
+  id_token text
+  access_token_expires_at timestamp
+  refresh_token_expires_at timestamp
+  scope text
+  password text
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    user_id
+  }
+}
+
+Table verification {
+  id text [pk]
+  identifier text [not null]
+  value text [not null]
+  expires_at timestamp [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    identifier
+  }
+}
+
+// ==========================================
+// QUIZ TABLES
+// ==========================================
+
+Table theme {
+  id text [pk]
+  name text [not null, unique]
+  description text
+  color text [note: 'Hex color for UI display']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+}
+
+Table tag {
+  id text [pk]
+  name text [not null, unique]
+  created_at timestamp [not null, default: `now()`]
+}
+
+Table question {
+  id text [pk]
+  content text [not null, note: 'The question text']
+  answer_a text [not null]
+  answer_b text [not null]
+  answer_c text [not null]
+  answer_d text [not null]
+  correct_answer text [not null, note: 'a, b, c, or d']
+  explanation text [note: 'Optional explanation for the correct answer']
+  difficulty int [note: '1=easy, 2=medium, 3=hard']
+  theme_id text [not null, ref: > theme.id]
+  author_id text [not null, ref: > user.id]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    theme_id
+    author_id
+  }
+}
+
+Table question_tag {
+  question_id text [not null, ref: > question.id]
+  tag_id text [not null, ref: > tag.id]
+
+  indexes {
+    (question_id, tag_id) [pk]
+  }
+}
+
+// ==========================================
+// TABLE GROUPS (for visual organization)
+// ==========================================
+
+TableGroup authentication {
+  user
+  session
+  account
+  verification
+}
+
+TableGroup quiz {
+  theme
+  tag
+  question
+  question_tag
+}
+```
