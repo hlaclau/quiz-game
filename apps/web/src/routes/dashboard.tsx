@@ -5,14 +5,12 @@ export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
 	beforeLoad: async () => {
 		const session = await getUser();
-		return { session };
-	},
-	loader: async ({ context }) => {
-		if (!context.session) {
+		if (!session) {
 			throw redirect({
 				to: "/login",
 			});
 		}
+		return { session };
 	},
 });
 
@@ -20,9 +18,11 @@ function RouteComponent() {
 	const { session } = Route.useRouteContext();
 
 	return (
-		<div>
-			<h1>Dashboard</h1>
-			<p>Welcome {session?.user.name}</p>
+		<div className="container mx-auto px-4 py-8">
+			<h1 className="font-bold text-3xl">Dashboard</h1>
+			<p className="mt-4 text-muted-foreground">
+				Welcome back, {session?.user.name}!
+			</p>
 		</div>
 	);
 }
