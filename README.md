@@ -141,6 +141,14 @@ Table verification {
 // QUIZ TABLES
 // ==========================================
 
+Table difficulty {
+  id text [pk]
+  name text [not null, unique, note: 'Easy, Medium, Hard']
+  level int [not null, unique, note: '1, 2, 3 for sorting']
+  color text [note: 'Hex color for UI']
+  created_at timestamp [not null, default: `now()`]
+}
+
 Table theme {
   id text [pk]
   name text [not null, unique]
@@ -160,13 +168,14 @@ Table question {
   id text [pk]
   content text [not null, note: 'The question text']
   explanation text [note: 'Optional explanation for the correct answer']
-  difficulty int [note: '1=easy, 2=medium, 3=hard']
+  difficulty_id text [not null, ref: > difficulty.id]
   theme_id text [not null, ref: > theme.id]
   author_id text [not null, ref: > user.id]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
 
   indexes {
+    difficulty_id
     theme_id
     author_id
   }
@@ -205,6 +214,7 @@ TableGroup authentication {
 }
 
 TableGroup quiz {
+  difficulty
   theme
   tag
   question

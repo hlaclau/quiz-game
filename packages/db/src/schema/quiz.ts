@@ -10,6 +10,14 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
+export const difficulty = pgTable("difficulty", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull().unique(), // "Easy", "Medium", "Hard"
+	level: integer("level").notNull().unique(), // 1, 2, 3 for sorting
+	color: text("color"), // Hex color for UI
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const theme = pgTable("theme", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull().unique(),
@@ -34,7 +42,9 @@ export const question = pgTable(
 		id: text("id").primaryKey(),
 		content: text("content").notNull(),
 		explanation: text("explanation"),
-		difficulty: integer("difficulty"), // 1=easy, 2=medium, 3=hard
+		difficultyId: text("difficulty_id")
+			.notNull()
+			.references(() => difficulty.id, { onDelete: "restrict" }),
 		themeId: text("theme_id")
 			.notNull()
 			.references(() => theme.id, { onDelete: "cascade" }),
@@ -48,6 +58,7 @@ export const question = pgTable(
 			.notNull(),
 	},
 	(table) => [
+		index("question_difficulty_id_idx").on(table.difficultyId),
 		index("question_theme_id_idx").on(table.themeId),
 		index("question_author_id_idx").on(table.authorId),
 	],
@@ -85,6 +96,10 @@ export const questionTag = pgTable(
 );
 
 // Relations
+export const difficultyRelations = relations(difficulty, ({ many }) => ({
+	questions: many(question),
+}));
+
 export const themeRelations = relations(theme, ({ many }) => ({
 	questions: many(question),
 }));
@@ -94,6 +109,10 @@ export const tagRelations = relations(tag, ({ many }) => ({
 }));
 
 export const questionRelations = relations(question, ({ one, many }) => ({
+	difficulty: one(difficulty, {
+		fields: [question.difficultyId],
+		references: [difficulty.id],
+	}),
 	theme: one(theme, {
 		fields: [question.themeId],
 		references: [theme.id],
