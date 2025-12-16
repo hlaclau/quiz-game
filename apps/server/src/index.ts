@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { cors } from "@elysiajs/cors";
+import cors from "@elysiajs/cors";
 import { auth } from "@quiz-game/auth";
 import { Elysia } from "elysia";
 import { routes } from "./presentation/router";
