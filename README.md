@@ -159,11 +159,6 @@ Table tag {
 Table question {
   id text [pk]
   content text [not null, note: 'The question text']
-  answer_a text [not null]
-  answer_b text [not null]
-  answer_c text [not null]
-  answer_d text [not null]
-  correct_answer text [not null, note: 'a, b, c, or d']
   explanation text [note: 'Optional explanation for the correct answer']
   difficulty int [note: '1=easy, 2=medium, 3=hard']
   theme_id text [not null, ref: > theme.id]
@@ -174,6 +169,18 @@ Table question {
   indexes {
     theme_id
     author_id
+  }
+}
+
+Table answer {
+  id text [pk]
+  content text [not null]
+  is_correct boolean [not null, default: false]
+  question_id text [not null, ref: > question.id]
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    question_id
   }
 }
 
@@ -201,6 +208,7 @@ TableGroup quiz {
   theme
   tag
   question
+  answer
   question_tag
 }
 ```
