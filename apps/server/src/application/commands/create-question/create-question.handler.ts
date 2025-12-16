@@ -27,9 +27,14 @@ function toDTO(question: Question): QuestionDTO {
 export class CreateQuestionHandler {
 	constructor(private readonly questionRepository: IQuestionRepository) {}
 
-	async execute(request: CreateQuestionRequest): Promise<CreateQuestionResponse> {
+	async execute(
+		request: CreateQuestionRequest,
+	): Promise<CreateQuestionResponse> {
 		console.log("[CreateQuestionHandler] Starting execute...");
-		console.log("[CreateQuestionHandler] Request received:", JSON.stringify(request, null, 2));
+		console.log(
+			"[CreateQuestionHandler] Request received:",
+			JSON.stringify(request, null, 2),
+		);
 
 		try {
 			console.log("[CreateQuestionHandler] Calling repository.create...");
@@ -43,7 +48,10 @@ export class CreateQuestionHandler {
 				tagIds: request.tagIds,
 			});
 
-			console.log("[CreateQuestionHandler] Question created successfully:", question.id);
+			console.log(
+				"[CreateQuestionHandler] Question created successfully:",
+				question.id,
+			);
 
 			return {
 				data: toDTO(question),

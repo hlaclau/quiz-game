@@ -5,7 +5,9 @@ import type { IQuestionRepository } from "../domain/interfaces/question-reposito
 /**
  * Question Routes
  */
-export const createQuestionRoutes = (questionRepository: IQuestionRepository) => {
+export const createQuestionRoutes = (
+	questionRepository: IQuestionRepository,
+) => {
 	const createQuestionHandler = new CreateQuestionHandler(questionRepository);
 
 	return new Elysia({ prefix: "/api/questions" }).post(

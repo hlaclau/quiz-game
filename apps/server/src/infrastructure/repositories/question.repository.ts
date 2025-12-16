@@ -42,7 +42,10 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 					})
 					.returning();
 
-				console.log("[QuestionRepository] Question inserted, rows:", rows.length);
+				console.log(
+					"[QuestionRepository] Question inserted, rows:",
+					rows.length,
+				);
 
 				const row = rows[0];
 				if (!row) {
@@ -50,7 +53,10 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 				}
 
 				// Insert answers
-				console.log("[QuestionRepository] Inserting answers...", input.answers.length);
+				console.log(
+					"[QuestionRepository] Inserting answers...",
+					input.answers.length,
+				);
 				await tx.insert(answerTable).values(
 					input.answers.map((a) => ({
 						id: crypto.randomUUID(),
@@ -64,7 +70,10 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 
 				// Insert tags if provided
 				if (input.tagIds && input.tagIds.length > 0) {
-					console.log("[QuestionRepository] Inserting tags...", input.tagIds.length);
+					console.log(
+						"[QuestionRepository] Inserting tags...",
+						input.tagIds.length,
+					);
 					await tx.insert(questionTagTable).values(
 						input.tagIds.map((tagId) => ({
 							questionId,
