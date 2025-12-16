@@ -22,6 +22,13 @@
 			"when": 1765877374887,
 			"tag": "0002_mighty_la_nuit",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1765894693183,
+			"tag": "0003_ordinary_newton_destine",
+			"breakpoints": true
 		}
 	]
 }

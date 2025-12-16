@@ -8,6 +8,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "next-themes";
 import { Footer, Header } from "@/components/layout";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/lib/auth-provider";
 import appCss from "../index.css?url";
 
 export type RouterAppContext = {};
@@ -50,14 +51,16 @@ function RootDocument() {
 					enableSystem
 					disableTransitionOnChange
 				>
-					<div className="flex min-h-svh flex-col">
-						<Header />
-						<main className="flex-1">
-							<Outlet />
-						</main>
-						<Footer />
-					</div>
-					<Toaster richColors />
+					<AuthProvider>
+						<div className="flex min-h-svh flex-col">
+							<Header />
+							<main className="flex-1">
+								<Outlet />
+							</main>
+							<Footer />
+						</div>
+						<Toaster richColors />
+					</AuthProvider>
 				</ThemeProvider>
 				<TanStackRouterDevtools position="bottom-left" />
 				<Scripts />
