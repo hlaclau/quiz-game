@@ -2,8 +2,9 @@ import "dotenv/config";
 import { cors } from "@elysiajs/cors";
 import { auth } from "@quiz-game/auth";
 import { Elysia } from "elysia";
+import { routes } from "./presentation/router";
 
-const app = new Elysia()
+new Elysia()
 	.use(
 		cors({
 			origin: process.env.CORS_ORIGIN || "",
@@ -19,6 +20,7 @@ const app = new Elysia()
 		}
 		return status(405);
 	})
+	.use(routes)
 	.get("/", () => "OK")
 	.get("/api/health", () => "OK")
 	.listen(3000, () => {

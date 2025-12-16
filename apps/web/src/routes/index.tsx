@@ -1,26 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useHealth } from "@/hooks/use-health";
+import { ThemeList } from "@/components/theme-list";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
 });
 
 function HomeComponent() {
-	const { data: isHealthy, isLoading } = useHealth();
-
 	return (
-		<div className="flex flex-col items-center gap-4 p-8">
-			<h1 className="font-bold text-2xl">Quiz App</h1>
-			<div className="flex items-center gap-2">
-				<span>API Status:</span>
-				{isLoading ? (
-					<span className="text-yellow-500">Checking...</span>
-				) : isHealthy ? (
-					<span className="text-green-500">✓ Healthy (200)</span>
-				) : (
-					<span className="text-red-500">✗ Unhealthy</span>
-				)}
+		<div className="mx-auto w-full max-w-5xl px-6 py-12">
+			<div className="mb-10 text-center">
+				<h1 className="mb-3 font-bold text-4xl text-white tracking-tight">
+					Quiz Game
+				</h1>
+				<p className="text-lg text-white/60">
+					Choose a theme and test your knowledge
+				</p>
 			</div>
+
+			<section>
+				<h2 className="mb-6 font-semibold text-xl text-white/80">
+					Available Themes
+				</h2>
+				<ThemeList />
+			</section>
 		</div>
 	);
 }
