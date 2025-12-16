@@ -214,9 +214,6 @@ function HomeComponent() {
 					</div>
 				</BlurFade>
 			</section>
-
-			{/* Footer spacer */}
-			<div className="h-16" />
 		</div>
 	);
 }

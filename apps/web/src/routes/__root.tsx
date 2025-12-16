@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "next-themes";
-import { Header } from "@/components/layout";
+import { Footer, Header } from "@/components/layout";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../index.css?url";
 
@@ -55,6 +55,7 @@ function RootDocument() {
 						<main className="flex-1">
 							<Outlet />
 						</main>
+						<Footer />
 					</div>
 					<Toaster richColors />
 				</ThemeProvider>
