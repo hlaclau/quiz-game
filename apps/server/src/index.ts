@@ -9,7 +9,7 @@ import { z } from "zod";
 const createQuestionSchema = z.object({
 	content: z.string().min(1, "Question content is required"),
 	explanation: z.string().optional(),
-	difficulty: z.number().int().min(1).max(3).optional(),
+	difficultyId: z.string().min(1, "Difficulty ID is required"),
 	themeId: z.string().min(1, "Theme ID is required"),
 	answers: z
 		.array(
@@ -43,12 +43,12 @@ const app = new Elysia()
 		return status(405);
 	})
 	.get("/", () => "OK")
+	.get("/api/health", () => "OK")
 	.post("/api/questions", async ({ body, set }) => {
 		try {
 			console.log("Received body:", JSON.stringify(body, null, 2));
 			const parsed = createQuestionSchema.safeParse(body);
 			if (!parsed.success) {
-				console.log("Validation errors:", parsed.error.flatten());
 				set.status = 400;
 				return {
 					error: "Validation failed",
@@ -56,18 +56,18 @@ const app = new Elysia()
 				};
 			}
 
-			const { content, explanation, difficulty, themeId, answers, tagIds } =
+			const { content, explanation, difficultyId, themeId, answers, tagIds } =
 				parsed.data;
 
 			const questionId = crypto.randomUUID();
-			const authorId = "temp-author-id"; // TODO: get from auth
+			const authorId = "lfggScpZLtsI2ILtG1YDZM6uYcYs9bh4"; // TODO: get from auth
 
 			await db.transaction(async (tx) => {
 				await tx.insert(question).values({
 					id: questionId,
 					content,
 					explanation,
-					difficulty,
+					difficultyId,
 					themeId,
 					authorId,
 				});

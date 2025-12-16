@@ -1,33 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useHealth } from "@/hooks/use-health";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
 });
 
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
-
 function HomeComponent() {
+	const { data: isHealthy, isLoading } = useHealth();
+
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-2">
-			<pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-			<div className="grid gap-6">
-				<section className="rounded-lg border p-4">
-					<h2 className="mb-2 font-medium">API Status</h2>
-				</section>
+		<div className="flex flex-col items-center gap-4 p-8">
+			<h1 className="font-bold text-2xl">Quiz App</h1>
+			<div className="flex items-center gap-2">
+				<span>API Status:</span>
+				{isLoading ? (
+					<span className="text-yellow-500">Checking...</span>
+				) : isHealthy ? (
+					<span className="text-green-500">✓ Healthy (200)</span>
+				) : (
+					<span className="text-red-500">✗ Unhealthy</span>
+				)}
 			</div>
 		</div>
 	);

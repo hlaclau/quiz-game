@@ -15,6 +15,13 @@
 			"when": 1765876065000,
 			"tag": "0001_wise_stepford_cuckoos",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1765877374887,
+			"tag": "0002_mighty_la_nuit",
+			"breakpoints": true
 		}
 	]
 }
