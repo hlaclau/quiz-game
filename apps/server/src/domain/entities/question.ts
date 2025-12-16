@@ -1,0 +1,54 @@
+/**
+ * Question Domain Entity
+ * Represents a quiz question in the domain layer
+ */
+export interface QuestionProps {
+	id: string;
+	content: string;
+	explanation: string | null;
+	difficultyId: string;
+	themeId: string;
+	authorId: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export class Question {
+	private constructor(private readonly props: QuestionProps) {}
+
+	static create(props: QuestionProps): Question {
+		return new Question(props);
+	}
+
+	get id(): string {
+		return this.props.id;
+	}
+
+	get content(): string {
+		return this.props.content;
+	}
+
+	get explanation(): string | null {
+		return this.props.explanation;
+	}
+
+	get difficultyId(): string {
+		return this.props.difficultyId;
+	}
+
+	get themeId(): string {
+		return this.props.themeId;
+	}
+
+	get authorId(): string {
+		return this.props.authorId;
+	}
+
+	get createdAt(): Date {
+		return this.props.createdAt;
+	}
+
+	get updatedAt(): Date {
+		return this.props.updatedAt;
+	}
+}
