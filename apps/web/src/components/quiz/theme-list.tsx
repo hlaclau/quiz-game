@@ -1,6 +1,6 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { useThemes } from "@/hooks/use-themes";
 import { ThemeCard } from "./theme-card";
-import { Skeleton } from "./ui/skeleton";
 
 export function ThemeList() {
 	const { data, isLoading, error } = useThemes();
@@ -17,16 +17,16 @@ export function ThemeList() {
 
 	if (error) {
 		return (
-			<div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-				<p className="text-red-400">Failed to load themes</p>
+			<div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-6 text-center">
+				<p className="text-destructive">Failed to load themes</p>
 			</div>
 		);
 	}
 
 	if (!data?.data.length) {
 		return (
-			<div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-				<p className="text-white/60">No themes available yet</p>
+			<div className="rounded-2xl border border-border bg-muted/50 p-6 text-center">
+				<p className="text-muted-foreground">No themes available yet</p>
 			</div>
 		);
 	}
