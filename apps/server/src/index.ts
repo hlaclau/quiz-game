@@ -20,6 +20,7 @@ const app = new Elysia()
 		return status(405);
 	})
 	.get("/", () => "OK")
+	.get("/api/health", () => "OK")
 	.listen(3000, () => {
 		console.log("Server is running on http://localhost:3000");
 	});
