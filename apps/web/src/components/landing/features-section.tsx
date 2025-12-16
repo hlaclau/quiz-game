@@ -21,7 +21,7 @@ export function FeaturesSection() {
 						icon={<Zap className="size-6" />}
 						title="Lightning Fast"
 						description="Real-time responses and instant feedback on every answer"
-						gradient="from-amber-500 to-orange-500"
+						colorClass="bg-chart-4 text-chart-4"
 					/>
 				</BlurFade>
 				<BlurFade delay={0.2} inView>
@@ -29,7 +29,7 @@ export function FeaturesSection() {
 						icon={<Brain className="size-6" />}
 						title="Smart Learning"
 						description="Adaptive difficulty that grows with your knowledge"
-						gradient="from-violet-500 to-purple-500"
+						colorClass="bg-primary text-primary"
 					/>
 				</BlurFade>
 				<BlurFade delay={0.25} inView>
@@ -37,7 +37,7 @@ export function FeaturesSection() {
 						icon={<Trophy className="size-6" />}
 						title="Compete & Win"
 						description="Climb leaderboards and earn achievements"
-						gradient="from-emerald-500 to-teal-500"
+						colorClass="bg-chart-3 text-chart-3"
 					/>
 				</BlurFade>
 			</div>
@@ -49,18 +49,20 @@ function FeatureCard({
 	icon,
 	title,
 	description,
-	gradient,
+	colorClass,
 }: {
 	icon: React.ReactNode;
 	title: string;
 	description: string;
-	gradient: string;
+	colorClass: string;
 }) {
+	const [bgColor, textColor] = colorClass.split(" ");
+
 	return (
-		<div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-8 backdrop-blur-sm transition-all hover:border-violet-500/30 hover:bg-card/80">
+		<div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-8 backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-card/80">
 			{/* Icon */}
 			<div
-				className={`mb-4 inline-flex rounded-xl bg-gradient-to-br ${gradient} p-3 text-white shadow-lg`}
+				className={`mb-4 inline-flex rounded-xl ${bgColor} p-3 text-primary-foreground shadow-lg`}
 			>
 				{icon}
 			</div>
@@ -70,7 +72,7 @@ function FeatureCard({
 
 			{/* Hover glow */}
 			<div
-				className={`-bottom-20 -right-20 absolute size-40 rounded-full bg-gradient-to-br ${gradient} opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-20`}
+				className={`-bottom-20 -right-20 absolute size-40 rounded-full ${bgColor} opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-20`}
 			/>
 		</div>
 	);

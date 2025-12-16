@@ -9,7 +9,7 @@ export function HeroSection() {
 		<section className="relative mx-auto max-w-6xl px-6 pt-20 pb-16">
 			<div className="flex flex-col items-center text-center">
 				<BlurFade delay={0.1} inView>
-					<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-sm text-violet-400">
+					<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-primary text-sm">
 						<Sparkles className="size-4" />
 						<span>Challenge Your Knowledge</span>
 					</div>
@@ -19,7 +19,7 @@ export function HeroSection() {
 					<h1 className="mb-4 font-bold text-5xl text-foreground tracking-tight md:text-7xl">
 						The Ultimate
 						<br />
-						<span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
+						<span className="bg-gradient-to-r from-primary via-accent to-chart-2 bg-clip-text text-transparent">
 							Quiz Experience
 						</span>
 					</h1>
@@ -33,7 +33,7 @@ export function HeroSection() {
 
 				<BlurFade delay={0.35} inView>
 					<WordRotate
-						className="font-semibold text-2xl text-violet-400 md:text-3xl"
+						className="font-semibold text-2xl text-primary md:text-3xl"
 						words={[
 							"Science & Technology",
 							"History & Culture",
@@ -46,11 +46,7 @@ export function HeroSection() {
 
 				<BlurFade delay={0.4} inView>
 					<div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">
-						<ShimmerButton
-							className="h-12 px-8 font-medium text-base"
-							shimmerColor="#a855f7"
-							background="linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
-						>
+						<ShimmerButton className="h-12 px-8 font-medium text-base">
 							<span className="flex items-center gap-2">
 								Start Playing
 								<ArrowRight className="size-4" />
@@ -58,7 +54,7 @@ export function HeroSection() {
 						</ShimmerButton>
 						<Link
 							to="/login"
-							className="flex h-12 items-center gap-2 rounded-full border border-border bg-background/50 px-8 font-medium text-base text-foreground backdrop-blur-sm transition-all hover:border-violet-500/50 hover:bg-violet-500/10"
+							className="flex h-12 items-center gap-2 rounded-full border border-border bg-background/50 px-8 font-medium text-base text-foreground backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-primary/10"
 						>
 							Sign In
 						</Link>

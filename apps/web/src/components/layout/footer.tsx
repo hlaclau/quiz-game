@@ -21,11 +21,11 @@ export function Footer() {
 					{/* Brand */}
 					<div className="sm:col-span-2">
 						<Link to="/" className="mb-4 inline-flex items-center gap-1.5">
-							<div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-sm text-white shadow-lg shadow-violet-500/25">
+							<div className="flex size-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground text-sm shadow-lg shadow-primary/25">
 								Q
 							</div>
 							<span className="font-bold text-foreground text-xl">
-								Quiz<span className="text-violet-500">App</span>
+								Quiz<span className="text-primary">App</span>
 							</span>
 						</Link>
 						<p className="max-w-xs text-muted-foreground text-sm">
@@ -79,8 +79,9 @@ export function Footer() {
 						© {new Date().getFullYear()} QuizApp. All rights reserved.
 					</p>
 					<p className="flex items-center gap-1 text-muted-foreground text-sm">
-						Made with <Heart className="size-3.5 fill-red-500 text-red-500" />{" "}
-						by Ynov Students
+						Made with{" "}
+						<Heart className="size-3.5 fill-destructive text-destructive" /> by
+						Ynov Students
 					</p>
 				</div>
 			</div>

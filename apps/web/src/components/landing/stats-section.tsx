@@ -8,25 +8,25 @@ export function StatsSection() {
 			<div className="mx-auto max-w-6xl px-6">
 				<div className="grid grid-cols-2 gap-6 md:grid-cols-4">
 					<StatCard
-						icon={<Brain className="size-5 text-violet-400" />}
+						icon={<Brain className="size-5 text-chart-1" />}
 						value={500}
 						label="Questions"
 						suffix="+"
 					/>
 					<StatCard
-						icon={<Users className="size-5 text-fuchsia-400" />}
+						icon={<Users className="size-5 text-chart-2" />}
 						value={10}
 						label="Active Players"
 						suffix="K+"
 					/>
 					<StatCard
-						icon={<Trophy className="size-5 text-amber-400" />}
+						icon={<Trophy className="size-5 text-chart-4" />}
 						value={50}
 						label="Challenges"
 						suffix="+"
 					/>
 					<StatCard
-						icon={<Zap className="size-5 text-emerald-400" />}
+						icon={<Zap className="size-5 text-chart-3" />}
 						value={99}
 						label="Uptime"
 						suffix="%"
@@ -49,7 +49,7 @@ function StatCard({
 	suffix?: string;
 }) {
 	return (
-		<div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all hover:border-violet-500/30 hover:bg-card/80">
+		<div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-card/80">
 			<div className="mb-3 flex items-center gap-2">
 				{icon}
 				<span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
@@ -58,7 +58,7 @@ function StatCard({
 			</div>
 			<div className="font-bold text-3xl text-foreground">
 				<NumberTicker value={value} />
-				<span className="text-violet-400">{suffix}</span>
+				<span className="text-primary">{suffix}</span>
 			</div>
 		</div>
 	);

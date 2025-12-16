@@ -82,7 +82,7 @@ export default function SignUpForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-destructive">
 										{error?.message}
 									</p>
 								))}
@@ -105,7 +105,7 @@ export default function SignUpForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-destructive">
 										{error?.message}
 									</p>
 								))}
@@ -128,7 +128,7 @@ export default function SignUpForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<p key={error?.message} className="text-destructive">
 										{error?.message}
 									</p>
 								))}
@@ -154,7 +154,7 @@ export default function SignUpForm({
 				<Button
 					variant="link"
 					onClick={onSwitchToSignIn}
-					className="text-violet-500 hover:text-violet-400"
+					className="text-primary hover:text-primary/80"
 				>
 					Already have an account? Sign In
 				</Button>

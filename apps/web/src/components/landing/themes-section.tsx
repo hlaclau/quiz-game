@@ -18,7 +18,7 @@ export function ThemesSection() {
 					</div>
 					<Link
 						to="/"
-						className="hidden items-center gap-1 text-sm text-violet-400 transition-colors hover:text-violet-300 md:flex"
+						className="hidden items-center gap-1 text-primary text-sm transition-colors hover:text-primary/80 md:flex"
 					>
 						View all themes
 						<ArrowRight className="size-4" />

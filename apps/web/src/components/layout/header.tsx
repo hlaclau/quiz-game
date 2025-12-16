@@ -26,11 +26,11 @@ export default function Header() {
 						to="/"
 						className="group flex items-center gap-1.5 font-bold text-xl"
 					>
-						<div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-sm text-white shadow-lg shadow-violet-500/25 transition-shadow group-hover:shadow-violet-500/40">
+						<div className="flex size-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground text-sm shadow-lg shadow-primary/25 transition-shadow group-hover:shadow-primary/40">
 							Q
 						</div>
 						<span className="text-foreground">
-							Quiz<span className="text-violet-500">App</span>
+							Quiz<span className="text-primary">App</span>
 						</span>
 					</Link>
 
@@ -45,7 +45,7 @@ export default function Header() {
 									className={cn(
 										"rounded-lg px-3 py-2 text-sm font-medium transition-colors",
 										isActive
-											? "bg-violet-500/10 text-violet-500"
+											? "bg-primary/10 text-primary"
 											: "text-muted-foreground hover:bg-muted hover:text-foreground",
 									)}
 								>
@@ -94,7 +94,7 @@ export default function Header() {
 									className={cn(
 										"rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
 										isActive
-											? "bg-violet-500/10 text-violet-500"
+											? "bg-primary/10 text-primary"
 											: "text-muted-foreground hover:bg-muted hover:text-foreground",
 									)}
 								>
