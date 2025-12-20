@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { repositories } from "../infrastructure/container";
+import { createDifficultyRoutes } from "./difficulty.routes";
 import { createQuestionRoutes } from "./question.routes";
 import { createThemeRoutes } from "./theme.routes";
 
@@ -8,4 +9,5 @@ import { createThemeRoutes } from "./theme.routes";
  */
 export const routes = new Elysia()
 	.use(createThemeRoutes(repositories.theme))
-	.use(createQuestionRoutes(repositories.question));
+	.use(createQuestionRoutes(repositories.question))
+	.use(createDifficultyRoutes(repositories.difficulty));
