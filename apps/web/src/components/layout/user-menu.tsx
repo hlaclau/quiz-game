@@ -37,7 +37,7 @@ function UserAvatar({
 		.slice(0, 2);
 
 	return (
-		<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+		<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground text-sm">
 			{initials}
 		</div>
 	);

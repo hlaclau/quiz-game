@@ -32,7 +32,7 @@ export default function Header() {
 	const visibleLinks = [...publicLinks, ...(isAuthenticated ? authLinks : [])];
 
 	return (
-		<header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+		<header className="sticky top-0 z-50 border-border/40 border-b bg-background/80 backdrop-blur-xl">
 			<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
 				{/* Logo & Nav */}
 				<div className="flex items-center gap-8">
@@ -57,7 +57,7 @@ export default function Header() {
 									key={to}
 									to={to}
 									className={cn(
-										"rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+										"rounded-lg px-3 py-2 font-medium text-sm transition-colors",
 										isActive
 											? "bg-primary/10 text-primary"
 											: "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -96,7 +96,7 @@ export default function Header() {
 
 			{/* Mobile Navigation */}
 			{mobileMenuOpen && (
-				<div className="border-t border-border/40 bg-background/95 backdrop-blur-xl md:hidden">
+				<div className="border-border/40 border-t bg-background/95 backdrop-blur-xl md:hidden">
 					<nav className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4">
 						{visibleLinks.map(({ to, label }) => {
 							const isActive = location.pathname === to;
@@ -106,7 +106,7 @@ export default function Header() {
 									to={to}
 									onClick={() => setMobileMenuOpen(false)}
 									className={cn(
-										"rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+										"rounded-lg px-3 py-2.5 font-medium text-sm transition-colors",
 										isActive
 											? "bg-primary/10 text-primary"
 											: "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -116,7 +116,7 @@ export default function Header() {
 								</Link>
 							);
 						})}
-						<div className="mt-2 border-t border-border/40 pt-4">
+						<div className="mt-2 border-border/40 border-t pt-4">
 							<UserMenu />
 						</div>
 					</nav>
