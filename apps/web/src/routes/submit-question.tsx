@@ -113,8 +113,6 @@ function RouteComponent() {
 			(d) => d.name.toLowerCase() === values.difficultyId.toLowerCase()
 		);
 
-		console.log("Selected Difficulty:", selectedDifficulty);
-
 		if (!selectedDifficulty) {
 			toast.error("Invalid difficulty selected");
 			return;
@@ -261,7 +259,7 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border border-green-500 bg-green-50 p-4 dark:bg-green-950">
-											<FormLabel className="text-green-700 dark:text-green-300">
+											<FormLabel className="mb-2 block text-green-700 dark:text-green-300">
 												✓ Correct Answer
 											</FormLabel>
 											<FormControl>
@@ -284,7 +282,7 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border p-4">
-											<FormLabel>Wrong Answer 1</FormLabel>
+											<FormLabel className="mb-2 block">Wrong Answer 1</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter a wrong answer..."
@@ -303,7 +301,7 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border p-4">
-											<FormLabel>Wrong Answer 2</FormLabel>
+											<FormLabel className="mb-2 block">Wrong Answer 2</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter a wrong answer..."
@@ -322,7 +320,7 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border p-4">
-											<FormLabel>Wrong Answer 3</FormLabel>
+											<FormLabel className="mb-2 block">Wrong Answer 3</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter a wrong answer..."
