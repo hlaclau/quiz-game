@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { useAuth } from "@/lib/auth-provider";
 import { Loader } from "@/components/shared";
+import { useAuth } from "@/lib/auth-provider";
 
 type AuthGuardProps = {
 	children: ReactNode;
