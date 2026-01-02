@@ -28,9 +28,9 @@ import { useThemes } from "@/hooks/use-themes";
 import { api } from "@/lib/api";
 
 const DIFFICULTY_OPTIONS = [
-	{ id: "easy", label: "Easy" },
-	{ id: "medium", label: "Medium" },
-	{ id: "hard", label: "Hard" },
+	{ name: "easy", label: "Easy" },
+	{ name: "medium", label: "Medium" },
+	{ name: "hard", label: "Hard" },
 ] as const;
 
 type FormValues = {
@@ -107,6 +107,19 @@ function RouteComponent() {
 			return;
 		}
 
+		// Fetch difficulties to get the GUID for the selected difficulty
+		const difficultiesResponse = await api.difficulties.getAll();
+		const selectedDifficulty = difficultiesResponse.data.find(
+			(d) => d.name.toLowerCase() === values.difficultyId.toLowerCase()
+		);
+
+		console.log("Selected Difficulty:", selectedDifficulty);
+
+		if (!selectedDifficulty) {
+			toast.error("Invalid difficulty selected");
+			return;
+		}
+
 		const answers = [
 			{ content: values.correctAnswer, isCorrect: true },
 			{ content: values.wrongAnswer1, isCorrect: false },
@@ -118,7 +131,7 @@ function RouteComponent() {
 			content: values.content,
 			explanation: values.explanation || null,
 			themeId: values.themeId,
-			difficultyId: values.difficultyId,
+			difficultyId: selectedDifficulty.id,
 			authorId: session.user.id,
 			answers,
 		});
@@ -214,11 +227,11 @@ function RouteComponent() {
 										>
 											{DIFFICULTY_OPTIONS.map((option) => (
 												<FormItem
-													key={option.id}
+													key={option.name}
 													className="flex items-center space-x-2 space-y-0"
 												>
 													<FormControl>
-														<RadioGroupItem value={option.id} />
+														<RadioGroupItem value={option.name} />
 													</FormControl>
 													<FormLabel className="cursor-pointer font-normal">
 														{option.label}

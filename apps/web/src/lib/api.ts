@@ -18,6 +18,22 @@ export interface GetThemesResponse {
 }
 
 /**
+ * Difficulty DTO from API
+ */
+export interface DifficultyDTO {
+	id: string;
+	name: string;
+	level: number;
+	color: string | null;
+	createdAt: string;
+}
+
+export interface GetDifficultiesResponse {
+	data: DifficultyDTO[];
+	count: number;
+}
+
+/**
  * Answer input for creating a question
  */
 export interface CreateAnswerInput {
@@ -47,6 +63,15 @@ export const api = {
 			const response = await fetch(`${API_URL}/api/themes`);
 			if (!response.ok) {
 				throw new Error("Failed to fetch themes");
+			}
+			return response.json();
+		},
+	},
+	difficulties: {
+		getAll: async (): Promise<GetDifficultiesResponse> => {
+			const response = await fetch(`${API_URL}/api/difficulties`);
+			if (!response.ok) {
+				throw new Error("Failed to fetch difficulties");
 			}
 			return response.json();
 		},
