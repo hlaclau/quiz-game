@@ -1,16 +1,13 @@
 import { Elysia, t } from "elysia";
-import { CreateQuestionHandler } from "../application/commands/create-question/create-question.handler";
+import type { CreateQuestionHandler } from "../application/commands/create-question/create-question.handler";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
-import type { IQuestionRepository } from "../domain/interfaces/question-repository.interface";
 
 /**
  * Question Routes
  */
 export const createQuestionRoutes = (
-	questionRepository: IQuestionRepository,
+	createQuestionHandler: CreateQuestionHandler,
 ) => {
-	const createQuestionHandler = new CreateQuestionHandler(questionRepository);
-
 	return new Elysia({ prefix: "/api/questions" })
 		.onError(({ code, set }) => {
 			if (code === "VALIDATION") {

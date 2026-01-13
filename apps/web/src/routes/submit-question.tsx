@@ -1,6 +1,5 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -102,7 +101,12 @@ function RouteComponent() {
 			toast.error("Please select a difficulty");
 			return;
 		}
-		if (!values.correctAnswer || !values.wrongAnswer1 || !values.wrongAnswer2 || !values.wrongAnswer3) {
+		if (
+			!values.correctAnswer ||
+			!values.wrongAnswer1 ||
+			!values.wrongAnswer2 ||
+			!values.wrongAnswer3
+		) {
 			toast.error("All answers are required");
 			return;
 		}
@@ -110,7 +114,7 @@ function RouteComponent() {
 		// Fetch difficulties to get the GUID for the selected difficulty
 		const difficultiesResponse = await api.difficulties.getAll();
 		const selectedDifficulty = difficultiesResponse.data.find(
-			(d) => d.name.toLowerCase() === values.difficultyId.toLowerCase()
+			(d) => d.name.toLowerCase() === values.difficultyId.toLowerCase(),
 		);
 
 		if (!selectedDifficulty) {
@@ -282,7 +286,9 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border p-4">
-											<FormLabel className="mb-2 block">Wrong Answer 1</FormLabel>
+											<FormLabel className="mb-2 block">
+												Wrong Answer 1
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter a wrong answer..."
@@ -301,7 +307,9 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border p-4">
-											<FormLabel className="mb-2 block">Wrong Answer 2</FormLabel>
+											<FormLabel className="mb-2 block">
+												Wrong Answer 2
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter a wrong answer..."
@@ -320,7 +328,9 @@ function RouteComponent() {
 								render={({ field }) => (
 									<FormItem>
 										<div className="rounded-lg border p-4">
-											<FormLabel className="mb-2 block">Wrong Answer 3</FormLabel>
+											<FormLabel className="mb-2 block">
+												Wrong Answer 3
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="Enter a wrong answer..."
