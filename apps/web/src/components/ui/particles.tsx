@@ -41,8 +41,8 @@ interface ParticlesProps extends React.ComponentPropsWithoutRef<"div"> {
 	vy?: number;
 }
 
-function hexToRgb(hex: string): number[] {
-	hex = hex.replace("#", "");
+function hexToRgb(hexInput: string): number[] {
+	let hex = hexInput.replace("#", "");
 
 	if (hex.length === 3) {
 		hex = hex
@@ -94,6 +94,7 @@ export const Particles: React.FC<ParticlesProps> = ({
 	const rafID = useRef<number | null>(null);
 	const resizeTimeout = useRef<NodeJS.Timeout | null>(null);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Canvas animation loop runs on mount and color change only
 	useEffect(() => {
 		if (canvasRef.current) {
 			context.current = canvasRef.current.getContext("2d");
@@ -123,10 +124,12 @@ export const Particles: React.FC<ParticlesProps> = ({
 		};
 	}, [color]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally tracks mouse position changes
 	useEffect(() => {
 		onMouseMove();
 	}, [mousePosition.x, mousePosition.y]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Reinitialize canvas when refresh prop changes
 	useEffect(() => {
 		initCanvas();
 	}, [refresh]);

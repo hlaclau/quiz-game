@@ -56,7 +56,7 @@ function FeatureCard({
 	description: string;
 	colorClass: string;
 }) {
-	const [bgColor, textColor] = colorClass.split(" ");
+	const [bgColor] = colorClass.split(" ");
 
 	return (
 		<div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-8 backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-card/80">

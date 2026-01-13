@@ -68,20 +68,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	// Role helpers - ready for when you add roles
 	const hasRole = useCallback(
-		(role: string) => {
+		(_role: string) => {
 			if (!user) return false;
 			// When you add roles, update this:
-			// return user.role === role;
+			// return user.role === _role;
 			return false;
 		},
 		[user],
 	);
 
 	const hasAnyRole = useCallback(
-		(roles: string[]) => {
+		(_roles: string[]) => {
 			if (!user) return false;
 			// When you add roles, update this:
-			// return roles.includes(user.role);
+			// return _roles.includes(user.role);
 			return false;
 		},
 		[user],
@@ -157,8 +157,8 @@ export function useAuth() {
  */
 export function useRequireAuth() {
 	const auth = useAuth();
-	if (!auth.isAuthenticated || !auth.user) {
+	if (!auth.isAuthenticated || !auth.user || !auth.session) {
 		throw new Error("User must be authenticated");
 	}
-	return { ...auth, user: auth.user, session: auth.session! };
+	return { ...auth, user: auth.user, session: auth.session };
 }
