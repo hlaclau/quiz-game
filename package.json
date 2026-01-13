@@ -24,16 +24,18 @@
 		"db:push": "turbo -F @quiz-game/db db:push",
 		"db:studio": "turbo -F @quiz-game/db db:studio",
 		"db:generate": "turbo -F @quiz-game/db db:generate",
-		"db:migrate": "turbo -F @quiz-game/db db:migrate"
+		"db:migrate": "turbo -F @quiz-game/db db:migrate",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"dotenv": "^17.2.2",
 		"zod": "^4.1.11"
 	},
 	"devDependencies": {
-		"turbo": "^2.5.4",
 		"@biomejs/biome": "^2.2.0",
-		"@types/bun": "^1.2.6"
+		"@types/bun": "^1.2.6",
+		"husky": "^9.1.7",
+		"turbo": "^2.5.4"
 	},
 	"packageManager": "bun@1.2.22"
 }
