@@ -1,13 +1,10 @@
 import { Elysia } from "elysia";
-import { GetThemesHandler } from "../application/queries/get-themes/get-themes.handler";
-import type { IThemeRepository } from "../domain/interfaces/theme-repository.interface";
+import type { GetThemesHandler } from "../application/queries/get-themes/get-themes.handler";
 
 /**
  * Theme Routes
  */
-export const createThemeRoutes = (themeRepository: IThemeRepository) => {
-	const getThemesHandler = new GetThemesHandler(themeRepository);
-
+export const createThemeRoutes = (getThemesHandler: GetThemesHandler) => {
 	return new Elysia({ prefix: "/api/themes" }).get("/", () =>
 		getThemesHandler.execute(),
 	);
