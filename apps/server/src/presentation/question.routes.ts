@@ -1,12 +1,12 @@
 import { Elysia, t } from "elysia";
-import type { CreateQuestionHandler } from "../application/commands/create-question/create-question.handler";
+import type { CreateQuestionUseCase } from "../application/use-cases";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
 
 /**
  * Question Routes
  */
 export const createQuestionRoutes = (
-	createQuestionHandler: CreateQuestionHandler,
+	createQuestionUseCase: CreateQuestionUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/questions" })
 		.onError(({ code, set }) => {
@@ -20,7 +20,7 @@ export const createQuestionRoutes = (
 		.post(
 			"/",
 			async ({ body, set }) => {
-				await createQuestionHandler.execute(body);
+				await createQuestionUseCase.execute(body);
 				set.status = 201;
 			},
 			{

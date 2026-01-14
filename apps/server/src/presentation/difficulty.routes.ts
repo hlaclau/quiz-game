@@ -1,13 +1,13 @@
 import { Elysia } from "elysia";
-import type { GetDifficultiesHandler } from "../application/queries/get-difficulties/get-difficulties.handler";
+import type { GetDifficultiesUseCase } from "../application/use-cases";
 
 /**
  * Difficulty Routes
  */
 export const createDifficultyRoutes = (
-	getDifficultiesHandler: GetDifficultiesHandler,
+	getDifficultiesUseCase: GetDifficultiesUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/difficulties" }).get("/", () =>
-		getDifficultiesHandler.execute(),
+		getDifficultiesUseCase.execute(),
 	);
 };

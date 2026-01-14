@@ -1,9 +1,9 @@
 import type { ThemeDTO } from "../../dtos/theme.dto";
 
 /**
- * GetThemes Query Response
+ * Output for GetThemes use case
  */
-export interface GetThemesResponse {
+export interface GetThemesOutput {
 	data: ThemeDTO[];
 	count: number;
 }

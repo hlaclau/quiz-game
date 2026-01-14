@@ -1,8 +1,10 @@
 import { Question } from "../../../domain/entities/question";
 import type { IQuestionRepository } from "../../../domain/interfaces/question-repository.interface";
 import type { QuestionDTO } from "../../dtos/question.dto";
-import type { CreateQuestionRequest } from "./create-question.request";
-import type { CreateQuestionResponse } from "./create-question.response";
+import type {
+	CreateQuestionInput,
+	CreateQuestionOutput,
+} from "./create-question.types";
 
 /**
  * Maps a Question entity to a QuestionDTO
@@ -21,26 +23,24 @@ function toDTO(question: Question): QuestionDTO {
 }
 
 /**
- * CreateQuestion Command Handler
- * CQRS Handler - creates a new question with answers and tags
+ * CreateQuestion Use Case
+ * Creates a new question with answers and tags
  */
-export class CreateQuestionHandler {
+export class CreateQuestionUseCase {
 	constructor(private readonly questionRepository: IQuestionRepository) {}
 
-	async execute(
-		request: CreateQuestionRequest,
-	): Promise<CreateQuestionResponse> {
+	async execute(input: CreateQuestionInput): Promise<CreateQuestionOutput> {
 		// Validate domain rules
-		Question.validateAnswersCount(request.answers.length);
+		Question.validateAnswersCount(input.answers.length);
 
 		const question = await this.questionRepository.create({
-			content: request.content,
-			explanation: request.explanation ?? null,
-			difficultyId: request.difficultyId,
-			themeId: request.themeId,
-			authorId: request.authorId,
-			answers: request.answers,
-			tagIds: request.tagIds,
+			content: input.content,
+			explanation: input.explanation ?? null,
+			difficultyId: input.difficultyId,
+			themeId: input.themeId,
+			authorId: input.authorId,
+			answers: input.answers,
+			tagIds: input.tagIds,
 		});
 
 		return {
