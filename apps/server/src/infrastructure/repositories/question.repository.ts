@@ -132,13 +132,15 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		const offset = (page - 1) * limit;
 
 		// Build where conditions
-		const conditions = [];
-		if (filter.themeId) {
-			conditions.push(eq(questionTable.themeId, filter.themeId));
-		}
-		if (filter.validated !== undefined) {
-			conditions.push(eq(questionTable.validated, filter.validated));
-		}
+		const conditions = [
+			[Boolean(filter.themeId), () => eq(questionTable.themeId, filter.themeId!)],
+			[
+				filter.validated !== undefined,
+				() => eq(questionTable.validated, filter.validated!),
+			],
+		]
+			.filter(([predicate]) => predicate)
+			.map(([, buildCondition]) => buildCondition());
 
 		const whereCondition =
 			conditions.length > 0 ? and(...conditions) : undefined;
