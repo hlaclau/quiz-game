@@ -27,6 +27,18 @@ export interface CreateQuestionInput {
  */
 export interface FindQuestionsFilter {
 	themeId?: string;
+	validated?: boolean;
+}
+
+/**
+ * Sort options for finding questions
+ */
+export type SortField = "createdAt" | "updatedAt";
+export type SortOrder = "asc" | "desc";
+
+export interface SortOptions {
+	sortBy?: SortField;
+	sortOrder?: SortOrder;
 }
 
 /**
@@ -63,5 +75,10 @@ export interface IQuestionRepository {
 	findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,
+		sort?: SortOptions,
 	): Promise<PaginatedResult<Question>>;
+	setQuestionValidation(
+		id: string,
+		validated: boolean,
+	): Promise<Question | null>;
 }

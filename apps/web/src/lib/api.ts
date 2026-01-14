@@ -65,10 +65,16 @@ export interface QuestionWithAnswersDTO extends QuestionDTO {
 	answers: AnswerDTO[];
 }
 
+export type SortField = "createdAt" | "updatedAt";
+export type SortOrder = "asc" | "desc";
+
 export interface GetQuestionsParams {
 	page?: number;
 	limit?: number;
 	themeId?: string;
+	validated?: boolean;
+	sortBy?: SortField;
+	sortOrder?: SortOrder;
 }
 
 export interface GetQuestionsResponse {
@@ -134,6 +140,10 @@ export const api = {
 			if (params.page) searchParams.set("page", params.page.toString());
 			if (params.limit) searchParams.set("limit", params.limit.toString());
 			if (params.themeId) searchParams.set("themeId", params.themeId);
+			if (params.validated !== undefined)
+				searchParams.set("validated", params.validated.toString());
+			if (params.sortBy) searchParams.set("sortBy", params.sortBy);
+			if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
 
 			const url = `${API_URL}/api/questions${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 			const response = await fetch(url);
@@ -164,6 +174,27 @@ export const api = {
 				const error = await response.json().catch(() => ({}));
 				throw new Error(error.error || "Failed to create question");
 			}
+		},
+		setValidation: async (
+			id: string,
+			validated: boolean,
+		): Promise<QuestionDTO> => {
+			const response = await fetch(
+				`${API_URL}/api/questions/${id}/validation`,
+				{
+					method: "PATCH",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ validated }),
+				},
+			);
+			if (!response.ok) {
+				const error = await response.json().catch(() => ({}));
+				throw new Error(error.error || "Failed to update question validation");
+			}
+			const result = await response.json();
+			return result.data;
 		},
 	},
 };

@@ -1,4 +1,4 @@
-import { count, type Database, eq } from "@quiz-game/db";
+import { and, asc, count, type Database, desc, eq } from "@quiz-game/db";
 import {
 	answer as answerTable,
 	question as questionTable,
@@ -13,6 +13,7 @@ import type {
 	PaginatedResult,
 	PaginationOptions,
 	QuestionWithAnswers,
+	SortOptions,
 } from "../../domain/interfaces/question-repository.interface";
 
 /**
@@ -125,21 +126,48 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 	async findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,
+		sort?: SortOptions,
 	): Promise<PaginatedResult<Question>> {
 		const { page, limit } = pagination;
 		const offset = (page - 1) * limit;
 
-		const baseQuery = this.db.select().from(questionTable);
-		const countQuery = this.db.select({ count: count() }).from(questionTable);
+		// Build where conditions
+		const conditions = [];
+		if (filter.themeId) {
+			conditions.push(eq(questionTable.themeId, filter.themeId));
+		}
+		if (filter.validated !== undefined) {
+			conditions.push(eq(questionTable.validated, filter.validated));
+		}
 
-		const whereCondition = filter.themeId
-			? eq(questionTable.themeId, filter.themeId)
-			: undefined;
+		const whereCondition =
+			conditions.length > 0 ? and(...conditions) : undefined;
+
+		// Build sort order
+		const sortField = sort?.sortBy ?? "createdAt";
+		const sortOrder = sort?.sortOrder ?? "desc";
+		const orderBy =
+			sortOrder === "asc"
+				? asc(questionTable[sortField])
+				: desc(questionTable[sortField]);
+
+		const countQuery = this.db.select({ count: count() }).from(questionTable);
 
 		const [rows, countResult] = await Promise.all([
 			whereCondition
-				? baseQuery.where(whereCondition).limit(limit).offset(offset)
-				: baseQuery.limit(limit).offset(offset),
+				? this.db
+						.select()
+						.from(questionTable)
+						.where(whereCondition)
+						.orderBy(orderBy)
+						.limit(limit)
+						.offset(offset)
+				: this.db
+						.select()
+						.from(questionTable)
+						.orderBy(orderBy)
+						.limit(limit)
+						.offset(offset),
 			whereCondition ? countQuery.where(whereCondition) : countQuery,
 		]);
 
@@ -160,5 +188,31 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		);
 
 		return { data, total };
+	}
+
+	async setQuestionValidation(
+		id: string,
+		validated: boolean,
+	): Promise<Question | null> {
+		const rows = await this.db
+			.update(questionTable)
+			.set({ validated, updatedAt: new Date() })
+			.where(eq(questionTable.id, id))
+			.returning();
+
+		const row = rows[0];
+		if (!row) return null;
+
+		return Question.create({
+			id: row.id,
+			content: row.content,
+			explanation: row.explanation,
+			difficultyId: row.difficultyId,
+			themeId: row.themeId,
+			authorId: row.authorId,
+			validated: row.validated,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		});
 	}
 }

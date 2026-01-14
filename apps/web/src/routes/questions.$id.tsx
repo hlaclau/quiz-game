@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { CheckCircle, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import { getUser } from "@/functions/get-user";
 import { useDifficulties } from "@/hooks/use-difficulties";
 import { useQuestion } from "@/hooks/use-question";
 import { useThemes } from "@/hooks/use-themes";
+import { useSetQuestionValidation } from "@/hooks/use-validate-question";
 
 export const Route = createFileRoute("/questions/$id")({
 	component: RouteComponent,
@@ -33,11 +35,21 @@ function RouteComponent() {
 	const { data, isLoading, error } = useQuestion(id);
 	const { data: themesData } = useThemes();
 	const { data: difficultiesData } = useDifficulties();
+	const validationMutation = useSetQuestionValidation();
 
 	const theme = themesData?.data.find((t) => t.id === data?.data?.themeId);
 	const difficulty = difficultiesData?.data.find(
 		(d) => d.id === data?.data?.difficultyId,
 	);
+
+	const handleSetValidation = async (validated: boolean) => {
+		try {
+			await validationMutation.mutateAsync({ id, validated });
+			toast.success(validated ? "Question validated" : "Question unvalidated");
+		} catch {
+			toast.error("Failed to update question validation");
+		}
+	};
 
 	if (isLoading) {
 		return (
@@ -90,6 +102,18 @@ function RouteComponent() {
 					<Badge variant={question.validated ? "default" : "outline"}>
 						{question.validated ? "Validated" : "Pending"}
 					</Badge>
+					<Button
+						size="sm"
+						variant={question.validated ? "outline" : "default"}
+						onClick={() => handleSetValidation(!question.validated)}
+						disabled={validationMutation.isPending}
+					>
+						{validationMutation.isPending
+							? "Updating..."
+							: question.validated
+								? "Unvalidate"
+								: "Validate"}
+					</Button>
 				</div>
 				<p className="mt-1 text-muted-foreground text-sm">
 					Created on {new Date(question.createdAt).toLocaleDateString()}
