@@ -103,11 +103,14 @@ describe("GetDifficultiesUseCase", () => {
 
 		it("should preserve difficulty level ordering", async () => {
 			const result = await useCase.execute();
-			const [first, second, third] = result.data;
 
-			expect(first?.level).toBe(1);
-			expect(second?.level).toBe(2);
-			expect(third?.level).toBe(3);
+			// Assert that we have exactly 3 elements
+			expect(result.data).toHaveLength(3);
+
+			// Explicitly test that ordering matches level values
+			expect(result.data[0].level).toBe(1);
+			expect(result.data[1].level).toBe(2);
+			expect(result.data[2].level).toBe(3);
 		});
 	});
 });
