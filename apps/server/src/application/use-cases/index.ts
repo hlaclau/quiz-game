@@ -18,4 +18,9 @@ export {
 	type GetQuestionsOutput,
 	GetQuestionsUseCase,
 } from "./get-questions";
+export {
+	type GetRandomQuestionsInput,
+	type GetRandomQuestionsOutput,
+	GetRandomQuestionsUseCase,
+} from "./get-random-question";
 export { type GetThemesOutput, GetThemesUseCase } from "./get-themes";

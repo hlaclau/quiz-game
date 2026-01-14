@@ -64,4 +64,8 @@ export interface IQuestionRepository {
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,
 	): Promise<PaginatedResult<Question>>;
+	findRandomByTheme(
+		themeId: string,
+		limit: number,
+	): Promise<QuestionWithAnswers[]>;
 }
