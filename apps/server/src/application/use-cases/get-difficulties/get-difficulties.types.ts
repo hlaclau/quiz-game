@@ -1,9 +1,9 @@
 import type { DifficultyDTO } from "../../dtos/difficulty.dto";
 
 /**
- * GetDifficulties Query Response
+ * Output for GetDifficulties use case
  */
-export interface GetDifficultiesResponse {
+export interface GetDifficultiesOutput {
 	data: DifficultyDTO[];
 	count: number;
 }

@@ -1,7 +1,7 @@
 import type { Theme } from "../../../domain/entities/theme";
 import type { IThemeRepository } from "../../../domain/interfaces/theme-repository.interface";
 import type { ThemeDTO } from "../../dtos/theme.dto";
-import type { GetThemesResponse } from "./get-themes.response";
+import type { GetThemesOutput } from "./get-themes.types";
 
 /**
  * Maps a Theme entity to a ThemeDTO
@@ -18,13 +18,13 @@ function toDTO(theme: Theme): ThemeDTO {
 }
 
 /**
- * GetThemes Query Handler
- * CQRS Handler - retrieves all themes
+ * GetThemes Use Case
+ * Retrieves all available themes
  */
-export class GetThemesHandler {
+export class GetThemesUseCase {
 	constructor(private readonly themeRepository: IThemeRepository) {}
 
-	async execute(): Promise<GetThemesResponse> {
+	async execute(): Promise<GetThemesOutput> {
 		const themes = await this.themeRepository.findAll();
 		const data = themes.map(toDTO);
 
