@@ -73,14 +73,13 @@ function RouteComponent() {
 	const sortBy: SortField = "createdAt";
 	const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
-	const validatedParam =
+	const validatedFilterValue =
 		validationFilter === "all" ? undefined : validationFilter === "validated";
-
 	const { data: questionsData, isLoading: isLoadingQuestions } = useQuestions({
 		page,
 		limit: ITEMS_PER_PAGE,
 		themeId: themeFilter,
-		validated: validatedParam,
+		validated: validatedFilterValue,
 		sortBy,
 		sortOrder,
 	});
@@ -203,10 +202,10 @@ function RouteComponent() {
 										size="sm"
 										className="-ml-3 h-8 font-medium"
 										onClick={handleSortToggle}
+										aria-label="Toggle sort order by creation date"
 									>
 										Created
-										<ArrowUpDown className="ml-1 h-4 w-4" />
-										{sortOrder === "asc" ? " ↑" : " ↓"}
+										<ArrowUpDown className="ml-1 h-4 w-4" aria-hidden="true" />
 									</Button>
 								</TableHead>
 								<TableHead className="w-[100px]">Validated</TableHead>
