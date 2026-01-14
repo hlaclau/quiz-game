@@ -51,6 +51,7 @@ export const question = pgTable(
 		authorId: text("author_id")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
+		validated: boolean("validated").notNull().default(false),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
@@ -61,6 +62,7 @@ export const question = pgTable(
 		index("question_difficulty_id_idx").on(table.difficultyId),
 		index("question_theme_id_idx").on(table.themeId),
 		index("question_author_id_idx").on(table.authorId),
+		index("question_validated_idx").on(table.validated),
 	],
 );
 

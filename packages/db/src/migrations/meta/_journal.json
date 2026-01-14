@@ -29,6 +29,13 @@
 			"when": 1765894693183,
 			"tag": "0003_ordinary_newton_destine",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1768421221647,
+			"tag": "0004_early_chimera",
+			"breakpoints": true
 		}
 	]
 }
