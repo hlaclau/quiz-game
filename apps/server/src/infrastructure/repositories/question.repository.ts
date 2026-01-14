@@ -1,4 +1,4 @@
-import { count, type Database, eq } from "@quiz-game/db";
+import { and, asc, count, type Database, desc, eq } from "@quiz-game/db";
 import {
 	answer as answerTable,
 	question as questionTable,
@@ -13,6 +13,7 @@ import type {
 	PaginatedResult,
 	PaginationOptions,
 	QuestionWithAnswers,
+	SortOptions,
 } from "../../domain/interfaces/question-repository.interface";
 
 /**
@@ -125,22 +126,55 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 	async findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,
+		sort?: SortOptions,
 	): Promise<PaginatedResult<Question>> {
 		const { page, limit } = pagination;
 		const offset = (page - 1) * limit;
 
-		const baseQuery = this.db.select().from(questionTable);
-		const countQuery = this.db.select({ count: count() }).from(questionTable);
+		// Build where conditions
+		const conditions: Array<ReturnType<typeof eq>> = [];
 
-		const whereCondition = filter.themeId
-			? eq(questionTable.themeId, filter.themeId)
-			: undefined;
+		if (filter.themeId) {
+			conditions.push(eq(questionTable.themeId, filter.themeId));
+		}
 
+		if (filter.validated !== undefined) {
+			conditions.push(eq(questionTable.validated, filter.validated));
+		}
+		const hasConditions = conditions.length > 0;
+		const whereCondition = hasConditions ? and(...conditions) : undefined;
+
+		// Build sort order
+		const sortField = sort?.sortBy ?? "createdAt";
+		const sortOrder = sort?.sortOrder ?? "desc";
+		const sortFieldToColumn = {
+			createdAt: questionTable.createdAt,
+			updatedAt: questionTable.updatedAt,
+		} as const;
+		const sortColumn = sortFieldToColumn[sortField];
+		const orderBy = sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
+
+		// Build base queries
+		const baseSelectQuery = this.db
+			.select()
+			.from(questionTable)
+			.orderBy(orderBy)
+			.limit(limit)
+			.offset(offset);
+
+		const baseCountQuery = this.db
+			.select({ count: count() })
+			.from(questionTable);
+
+		// Execute queries with or without where clause
+		// When hasConditions is true, whereCondition is guaranteed to be defined
 		const [rows, countResult] = await Promise.all([
-			whereCondition
-				? baseQuery.where(whereCondition).limit(limit).offset(offset)
-				: baseQuery.limit(limit).offset(offset),
-			whereCondition ? countQuery.where(whereCondition) : countQuery,
+			hasConditions && whereCondition
+				? baseSelectQuery.where(whereCondition)
+				: baseSelectQuery,
+			hasConditions && whereCondition
+				? baseCountQuery.where(whereCondition)
+				: baseCountQuery,
 		]);
 
 		const total = countResult[0]?.count ?? 0;
@@ -160,5 +194,31 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		);
 
 		return { data, total };
+	}
+
+	async setQuestionValidation(
+		id: string,
+		validated: boolean,
+	): Promise<Question | null> {
+		const rows = await this.db
+			.update(questionTable)
+			.set({ validated, updatedAt: new Date() })
+			.where(eq(questionTable.id, id))
+			.returning();
+
+		const row = rows[0];
+		if (!row) return null;
+
+		return Question.create({
+			id: row.id,
+			content: row.content,
+			explanation: row.explanation,
+			difficultyId: row.difficultyId,
+			themeId: row.themeId,
+			authorId: row.authorId,
+			validated: row.validated,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		});
 	}
 }

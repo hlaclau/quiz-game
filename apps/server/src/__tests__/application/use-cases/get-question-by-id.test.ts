@@ -64,6 +64,7 @@ describe("GetQuestionByIdUseCase", () => {
 			create: mock(() => Promise.resolve(mockQuestion)),
 			findById: mock(() => Promise.resolve(mockQuestionWithAnswers)),
 			findAll: mock(() => Promise.resolve({ data: [], total: 0 })),
+			setQuestionValidation: mock(() => Promise.resolve(mockQuestion)),
 		};
 		useCase = new GetQuestionByIdUseCase(mockRepository);
 	});

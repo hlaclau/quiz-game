@@ -19,3 +19,8 @@ export {
 	GetQuestionsUseCase,
 } from "./get-questions";
 export { type GetThemesOutput, GetThemesUseCase } from "./get-themes";
+export {
+	type SetQuestionValidationInput,
+	type SetQuestionValidationOutput,
+	SetQuestionValidationUseCase,
+} from "./validate-question";

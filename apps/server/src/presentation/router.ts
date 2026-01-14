@@ -14,6 +14,7 @@ export const routes = new Elysia()
 			useCases.createQuestion,
 			useCases.getQuestionById,
 			useCases.getQuestions,
+			useCases.setQuestionValidation,
 		),
 	)
 	.use(createDifficultyRoutes(useCases.getDifficulties));
