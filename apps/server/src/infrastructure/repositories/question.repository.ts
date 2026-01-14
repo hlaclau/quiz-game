@@ -147,10 +147,12 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		// Build sort order
 		const sortField = sort?.sortBy ?? "createdAt";
 		const sortOrder = sort?.sortOrder ?? "desc";
-		const orderBy =
-			sortOrder === "asc"
-				? asc(questionTable[sortField])
-				: desc(questionTable[sortField]);
+		const sortFieldToColumn = {
+			createdAt: questionTable.createdAt,
+			updatedAt: questionTable.updatedAt,
+		} as const;
+		const sortColumn = sortFieldToColumn[sortField];
+		const orderBy = sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
 
 		// Build base queries
 		const baseSelectQuery = this.db
