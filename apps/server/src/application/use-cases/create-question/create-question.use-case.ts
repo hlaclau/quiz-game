@@ -17,6 +17,7 @@ function toDTO(question: Question): QuestionDTO {
 		difficultyId: question.difficultyId,
 		themeId: question.themeId,
 		authorId: question.authorId,
+		validated: question.validated,
 		createdAt: question.createdAt.toISOString(),
 		updatedAt: question.updatedAt.toISOString(),
 	};

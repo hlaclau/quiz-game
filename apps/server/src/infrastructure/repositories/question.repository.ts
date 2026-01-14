@@ -1,13 +1,18 @@
-import type { Database } from "@quiz-game/db";
+import { count, type Database, eq } from "@quiz-game/db";
 import {
 	answer as answerTable,
 	question as questionTable,
 	questionTag as questionTagTable,
 } from "@quiz-game/db/schema/index";
+import { Answer } from "../../domain/entities/answer";
 import { Question } from "../../domain/entities/question";
 import type {
 	CreateQuestionInput,
+	FindQuestionsFilter,
 	IQuestionRepository,
+	PaginatedResult,
+	PaginationOptions,
+	QuestionWithAnswers,
 } from "../../domain/interfaces/question-repository.interface";
 
 /**
@@ -71,8 +76,89 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 			difficultyId: result.difficultyId,
 			themeId: result.themeId,
 			authorId: result.authorId,
+			validated: result.validated,
 			createdAt: result.createdAt,
 			updatedAt: result.updatedAt,
 		});
+	}
+
+	async findById(id: string): Promise<QuestionWithAnswers | null> {
+		const questionRows = await this.db
+			.select()
+			.from(questionTable)
+			.where(eq(questionTable.id, id))
+			.limit(1);
+
+		const questionRow = questionRows[0];
+		if (!questionRow) return null;
+
+		const answerRows = await this.db
+			.select()
+			.from(answerTable)
+			.where(eq(answerTable.questionId, id));
+
+		const question = Question.create({
+			id: questionRow.id,
+			content: questionRow.content,
+			explanation: questionRow.explanation,
+			difficultyId: questionRow.difficultyId,
+			themeId: questionRow.themeId,
+			authorId: questionRow.authorId,
+			validated: questionRow.validated,
+			createdAt: questionRow.createdAt,
+			updatedAt: questionRow.updatedAt,
+		});
+
+		const answers = answerRows.map((row) =>
+			Answer.create({
+				id: row.id,
+				content: row.content,
+				isCorrect: row.isCorrect,
+				questionId: row.questionId,
+				createdAt: row.createdAt,
+			}),
+		);
+
+		return { question, answers };
+	}
+
+	async findAll(
+		filter: FindQuestionsFilter,
+		pagination: PaginationOptions,
+	): Promise<PaginatedResult<Question>> {
+		const { page, limit } = pagination;
+		const offset = (page - 1) * limit;
+
+		const baseQuery = this.db.select().from(questionTable);
+		const countQuery = this.db.select({ count: count() }).from(questionTable);
+
+		const whereCondition = filter.themeId
+			? eq(questionTable.themeId, filter.themeId)
+			: undefined;
+
+		const [rows, countResult] = await Promise.all([
+			whereCondition
+				? baseQuery.where(whereCondition).limit(limit).offset(offset)
+				: baseQuery.limit(limit).offset(offset),
+			whereCondition ? countQuery.where(whereCondition) : countQuery,
+		]);
+
+		const total = countResult[0]?.count ?? 0;
+
+		const data = rows.map((row) =>
+			Question.create({
+				id: row.id,
+				content: row.content,
+				explanation: row.explanation,
+				difficultyId: row.difficultyId,
+				themeId: row.themeId,
+				authorId: row.authorId,
+				validated: row.validated,
+				createdAt: row.createdAt,
+				updatedAt: row.updatedAt,
+			}),
+		);
+
+		return { data, total };
 	}
 }

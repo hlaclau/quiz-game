@@ -8,6 +8,7 @@ export interface QuestionDTO {
 	difficultyId: string;
 	themeId: string;
 	authorId: string;
+	validated: boolean;
 	createdAt: string;
 	updatedAt: string;
 }

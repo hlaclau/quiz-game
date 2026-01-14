@@ -7,29 +7,31 @@ describe("GetDifficultiesUseCase", () => {
 	let useCase: GetDifficultiesUseCase;
 	let mockRepository: IDifficultyRepository;
 
-	const mockDifficulties = [
-		Difficulty.create({
-			id: "diff-1",
-			name: "Easy",
-			level: 1,
-			color: "#4CAF50",
-			createdAt: new Date("2024-01-01"),
-		}),
-		Difficulty.create({
-			id: "diff-2",
-			name: "Medium",
-			level: 2,
-			color: "#FF9800",
-			createdAt: new Date("2024-01-02"),
-		}),
-		Difficulty.create({
-			id: "diff-3",
-			name: "Hard",
-			level: 3,
-			color: "#F44336",
-			createdAt: new Date("2024-01-03"),
-		}),
-	];
+	const mockDifficulty1 = Difficulty.create({
+		id: "diff-1",
+		name: "Easy",
+		level: 1,
+		color: "#4CAF50",
+		createdAt: new Date("2024-01-01"),
+	});
+
+	const mockDifficulty2 = Difficulty.create({
+		id: "diff-2",
+		name: "Medium",
+		level: 2,
+		color: "#FF9800",
+		createdAt: new Date("2024-01-02"),
+	});
+
+	const mockDifficulty3 = Difficulty.create({
+		id: "diff-3",
+		name: "Hard",
+		level: 3,
+		color: "#F44336",
+		createdAt: new Date("2024-01-03"),
+	});
+
+	const mockDifficulties = [mockDifficulty1, mockDifficulty2, mockDifficulty3];
 
 	beforeEach(() => {
 		mockRepository = {
@@ -55,7 +57,7 @@ describe("GetDifficultiesUseCase", () => {
 				name: "Easy",
 				level: 1,
 				color: "#4CAF50",
-				createdAt: mockDifficulties[0].createdAt.toISOString(),
+				createdAt: mockDifficulty1.createdAt.toISOString(),
 			});
 		});
 
@@ -82,27 +84,30 @@ describe("GetDifficultiesUseCase", () => {
 		});
 
 		it("should handle difficulty with null color", async () => {
-			const difficultiesWithNullColor = [
-				Difficulty.create({
-					id: "diff-4",
-					name: "Expert",
-					level: 4,
-					color: null,
-					createdAt: new Date("2024-01-04"),
-				}),
-			];
+			const difficultyWithNullColor = Difficulty.create({
+				id: "diff-4",
+				name: "Expert",
+				level: 4,
+				color: null,
+				createdAt: new Date("2024-01-04"),
+			});
 			mockRepository.findAll = mock(() =>
-				Promise.resolve(difficultiesWithNullColor),
+				Promise.resolve([difficultyWithNullColor]),
 			);
 
 			const result = await useCase.execute();
+			const firstDifficulty = result.data[0];
 
-			expect(result.data[0].color).toBeNull();
+			expect(firstDifficulty?.color).toBeNull();
 		});
 
 		it("should preserve difficulty level ordering", async () => {
 			const result = await useCase.execute();
 
+			// Assert that we have exactly 3 elements
+			expect(result.data).toHaveLength(3);
+
+			// Explicitly test that ordering matches level values
 			expect(result.data[0].level).toBe(1);
 			expect(result.data[1].level).toBe(2);
 			expect(result.data[2].level).toBe(3);

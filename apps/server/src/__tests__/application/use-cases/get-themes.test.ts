@@ -7,24 +7,25 @@ describe("GetThemesUseCase", () => {
 	let useCase: GetThemesUseCase;
 	let mockRepository: IThemeRepository;
 
-	const mockThemes = [
-		Theme.create({
-			id: "theme-1",
-			name: "Science",
-			description: "Science questions",
-			color: "#4CAF50",
-			createdAt: new Date("2024-01-01"),
-			updatedAt: new Date("2024-01-01"),
-		}),
-		Theme.create({
-			id: "theme-2",
-			name: "History",
-			description: "History questions",
-			color: "#FF5722",
-			createdAt: new Date("2024-01-02"),
-			updatedAt: new Date("2024-01-02"),
-		}),
-	];
+	const mockTheme1 = Theme.create({
+		id: "theme-1",
+		name: "Science",
+		description: "Science questions",
+		color: "#4CAF50",
+		createdAt: new Date("2024-01-01"),
+		updatedAt: new Date("2024-01-01"),
+	});
+
+	const mockTheme2 = Theme.create({
+		id: "theme-2",
+		name: "History",
+		description: "History questions",
+		color: "#FF5722",
+		createdAt: new Date("2024-01-02"),
+		updatedAt: new Date("2024-01-02"),
+	});
+
+	const mockThemes = [mockTheme1, mockTheme2];
 
 	beforeEach(() => {
 		mockRepository = {
@@ -50,8 +51,8 @@ describe("GetThemesUseCase", () => {
 				name: "Science",
 				description: "Science questions",
 				color: "#4CAF50",
-				createdAt: mockThemes[0].createdAt.toISOString(),
-				updatedAt: mockThemes[0].updatedAt.toISOString(),
+				createdAt: mockTheme1.createdAt.toISOString(),
+				updatedAt: mockTheme1.updatedAt.toISOString(),
 			});
 		});
 
@@ -78,22 +79,21 @@ describe("GetThemesUseCase", () => {
 		});
 
 		it("should handle themes with null description and color", async () => {
-			const themesWithNulls = [
-				Theme.create({
-					id: "theme-3",
-					name: "Sports",
-					description: null,
-					color: null,
-					createdAt: new Date("2024-01-03"),
-					updatedAt: new Date("2024-01-03"),
-				}),
-			];
-			mockRepository.findAll = mock(() => Promise.resolve(themesWithNulls));
+			const themeWithNulls = Theme.create({
+				id: "theme-3",
+				name: "Sports",
+				description: null,
+				color: null,
+				createdAt: new Date("2024-01-03"),
+				updatedAt: new Date("2024-01-03"),
+			});
+			mockRepository.findAll = mock(() => Promise.resolve([themeWithNulls]));
 
 			const result = await useCase.execute();
+			const firstTheme = result.data[0];
 
-			expect(result.data[0].description).toBeNull();
-			expect(result.data[0].color).toBeNull();
+			expect(firstTheme?.description).toBeNull();
+			expect(firstTheme?.color).toBeNull();
 		});
 	});
 });

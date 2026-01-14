@@ -30,6 +30,7 @@ describe("CreateQuestionUseCase", () => {
 		difficultyId: validInput.difficultyId,
 		themeId: validInput.themeId,
 		authorId: validInput.authorId,
+		validated: false,
 		createdAt: new Date("2024-01-01"),
 		updatedAt: new Date("2024-01-01"),
 	});
@@ -37,6 +38,8 @@ describe("CreateQuestionUseCase", () => {
 	beforeEach(() => {
 		mockRepository = {
 			create: mock(() => Promise.resolve(mockQuestion)),
+			findById: mock(() => Promise.resolve(null)),
+			findAll: mock(() => Promise.resolve({ data: [], total: 0 })),
 		};
 		useCase = new CreateQuestionUseCase(mockRepository);
 	});
@@ -52,6 +55,7 @@ describe("CreateQuestionUseCase", () => {
 				difficultyId: mockQuestion.difficultyId,
 				themeId: mockQuestion.themeId,
 				authorId: mockQuestion.authorId,
+				validated: mockQuestion.validated,
 				createdAt: mockQuestion.createdAt.toISOString(),
 				updatedAt: mockQuestion.updatedAt.toISOString(),
 			});
