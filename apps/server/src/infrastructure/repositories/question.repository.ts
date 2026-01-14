@@ -132,16 +132,17 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		const offset = (page - 1) * limit;
 
 		// Build where conditions
-		const conditions = [];
+		const conditions: Array<ReturnType<typeof eq>> = [];
+
 		if (filter.themeId) {
 			conditions.push(eq(questionTable.themeId, filter.themeId));
 		}
+
 		if (filter.validated !== undefined) {
 			conditions.push(eq(questionTable.validated, filter.validated));
 		}
-
-		const whereCondition =
-			conditions.length > 0 ? and(...conditions) : undefined;
+		const hasConditions = conditions.length > 0;
+		const whereCondition = hasConditions ? and(...conditions) : undefined;
 
 		// Build sort order
 		const sortField = sort?.sortBy ?? "createdAt";
@@ -151,24 +152,27 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 				? asc(questionTable[sortField])
 				: desc(questionTable[sortField]);
 
-		const countQuery = this.db.select({ count: count() }).from(questionTable);
+		// Build base queries
+		const baseSelectQuery = this.db
+			.select()
+			.from(questionTable)
+			.orderBy(orderBy)
+			.limit(limit)
+			.offset(offset);
 
+		const baseCountQuery = this.db
+			.select({ count: count() })
+			.from(questionTable);
+
+		// Execute queries with or without where clause
+		// When hasConditions is true, whereCondition is guaranteed to be defined
 		const [rows, countResult] = await Promise.all([
-			whereCondition
-				? this.db
-						.select()
-						.from(questionTable)
-						.where(whereCondition)
-						.orderBy(orderBy)
-						.limit(limit)
-						.offset(offset)
-				: this.db
-						.select()
-						.from(questionTable)
-						.orderBy(orderBy)
-						.limit(limit)
-						.offset(offset),
-			whereCondition ? countQuery.where(whereCondition) : countQuery,
+			hasConditions && whereCondition
+				? baseSelectQuery.where(whereCondition)
+				: baseSelectQuery,
+			hasConditions && whereCondition
+				? baseCountQuery.where(whereCondition)
+				: baseCountQuery,
 		]);
 
 		const total = countResult[0]?.count ?? 0;
