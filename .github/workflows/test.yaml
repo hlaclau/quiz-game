@@ -46,6 +46,7 @@ jobs:
       - name: Tests failed
         if: steps.tests.outputs.exit_code != '0'
         run: |
+          # Print a blank line for readability before the failure message.
           echo ""
           echo "❌ Some tests failed. Please check the test output above to see which tests need to be fixed."
           exit 1
