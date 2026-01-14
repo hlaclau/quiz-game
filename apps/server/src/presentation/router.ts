@@ -9,5 +9,11 @@ import { createThemeRoutes } from "./theme.routes";
  */
 export const routes = new Elysia()
 	.use(createThemeRoutes(useCases.getThemes))
-	.use(createQuestionRoutes(useCases.createQuestion, useCases.getQuestions))
+	.use(
+		createQuestionRoutes(
+			useCases.createQuestion,
+			useCases.getQuestionById,
+			useCases.getQuestions,
+		),
+	)
 	.use(createDifficultyRoutes(useCases.getDifficulties));

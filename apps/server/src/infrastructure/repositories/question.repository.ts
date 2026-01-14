@@ -80,6 +80,29 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		});
 	}
 
+	async findById(id: string): Promise<Question | null> {
+		const rows = await this.db
+			.select()
+			.from(questionTable)
+			.where(eq(questionTable.id, id))
+			.limit(1);
+
+		const row = rows[0];
+		if (!row) return null;
+
+		return Question.create({
+			id: row.id,
+			content: row.content,
+			explanation: row.explanation,
+			difficultyId: row.difficultyId,
+			themeId: row.themeId,
+			authorId: row.authorId,
+			validated: row.validated,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		});
+	}
+
 	async findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,

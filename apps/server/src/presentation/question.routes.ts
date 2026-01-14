@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import type {
 	CreateQuestionUseCase,
+	GetQuestionByIdUseCase,
 	GetQuestionsUseCase,
 } from "../application/use-cases";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
@@ -10,6 +11,7 @@ import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
  */
 export const createQuestionRoutes = (
 	createQuestionUseCase: CreateQuestionUseCase,
+	getQuestionByIdUseCase: GetQuestionByIdUseCase,
 	getQuestionsUseCase: GetQuestionsUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/questions" })
@@ -35,6 +37,22 @@ export const createQuestionRoutes = (
 					page: t.Optional(t.Number({ minimum: 1 })),
 					limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
 					themeId: t.Optional(t.String()),
+				}),
+			},
+		)
+		.get(
+			"/:id",
+			async ({ params, set }) => {
+				const result = await getQuestionByIdUseCase.execute({ id: params.id });
+				if (!result.data) {
+					set.status = 404;
+					return { error: "Question not found" };
+				}
+				return result;
+			},
+			{
+				params: t.Object({
+					id: t.String(),
 				}),
 			},
 		)

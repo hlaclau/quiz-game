@@ -38,8 +38,7 @@ describe("CreateQuestionUseCase", () => {
 	beforeEach(() => {
 		mockRepository = {
 			create: mock(() => Promise.resolve(mockQuestion)),
-			findAll: mock(() => Promise.resolve({ data: [], total: 0 })),
-		};
+		} as IQuestionRepository;
 		useCase = new CreateQuestionUseCase(mockRepository);
 	});
 

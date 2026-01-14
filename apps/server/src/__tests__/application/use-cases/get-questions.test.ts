@@ -7,36 +7,36 @@ describe("GetQuestionsUseCase", () => {
 	let useCase: GetQuestionsUseCase;
 	let mockRepository: IQuestionRepository;
 
-	const mockQuestions = [
-		Question.create({
-			id: "question-1",
-			content: "What is 2 + 2?",
-			explanation: "Basic math",
-			difficultyId: "diff-1",
-			themeId: "theme-1",
-			authorId: "author-1",
-			validated: true,
-			createdAt: new Date("2024-01-01"),
-			updatedAt: new Date("2024-01-01"),
-		}),
-		Question.create({
-			id: "question-2",
-			content: "What is the capital of France?",
-			explanation: "Geography",
-			difficultyId: "diff-2",
-			themeId: "theme-2",
-			authorId: "author-1",
-			validated: false,
-			createdAt: new Date("2024-01-02"),
-			updatedAt: new Date("2024-01-02"),
-		}),
-	];
+	const mockQuestion1 = Question.create({
+		id: "question-1",
+		content: "What is 2 + 2?",
+		explanation: "Basic math",
+		difficultyId: "diff-1",
+		themeId: "theme-1",
+		authorId: "author-1",
+		validated: true,
+		createdAt: new Date("2024-01-01"),
+		updatedAt: new Date("2024-01-01"),
+	});
+
+	const mockQuestion2 = Question.create({
+		id: "question-2",
+		content: "What is the capital of France?",
+		explanation: "Geography",
+		difficultyId: "diff-2",
+		themeId: "theme-2",
+		authorId: "author-1",
+		validated: false,
+		createdAt: new Date("2024-01-02"),
+		updatedAt: new Date("2024-01-02"),
+	});
+
+	const mockQuestions = [mockQuestion1, mockQuestion2];
 
 	beforeEach(() => {
 		mockRepository = {
-			create: mock(() => Promise.resolve(mockQuestions[0]!)),
 			findAll: mock(() => Promise.resolve({ data: mockQuestions, total: 2 })),
-		};
+		} as IQuestionRepository;
 		useCase = new GetQuestionsUseCase(mockRepository);
 	});
 
@@ -81,16 +81,16 @@ describe("GetQuestionsUseCase", () => {
 				themeId: "theme-1",
 				authorId: "author-1",
 				validated: true,
-				createdAt: mockQuestions[0]!.createdAt.toISOString(),
-				updatedAt: mockQuestions[0]!.updatedAt.toISOString(),
+				createdAt: mockQuestion1.createdAt.toISOString(),
+				updatedAt: mockQuestion1.updatedAt.toISOString(),
 			});
 		});
 
 		it("should include validated field in DTO", async () => {
 			const result = await useCase.execute({ page: 1, limit: 10 });
 
-			expect(result.data[0]!.validated).toBe(true);
-			expect(result.data[1]!.validated).toBe(false);
+			expect(result.data[0]?.validated).toBe(true);
+			expect(result.data[1]?.validated).toBe(false);
 		});
 
 		it("should handle empty results", async () => {
@@ -159,7 +159,7 @@ describe("GetQuestionsUseCase", () => {
 
 			const result = await useCase.execute({ page: 1, limit: 10 });
 
-			expect(result.data[0]!.explanation).toBeNull();
+			expect(result.data[0]?.explanation).toBeNull();
 		});
 	});
 });

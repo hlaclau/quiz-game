@@ -50,6 +50,7 @@ export interface PaginatedResult<T> {
  */
 export interface IQuestionRepository {
 	create(input: CreateQuestionInput): Promise<Question>;
+	findById(id: string): Promise<Question | null>;
 	findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,

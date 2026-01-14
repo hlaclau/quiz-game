@@ -2,6 +2,7 @@ import { db } from "@quiz-game/db";
 import {
 	CreateQuestionUseCase,
 	GetDifficultiesUseCase,
+	GetQuestionByIdUseCase,
 	GetQuestionsUseCase,
 	GetThemesUseCase,
 } from "../application/use-cases";
@@ -23,6 +24,7 @@ const repositories = {
  */
 export const useCases = {
 	createQuestion: new CreateQuestionUseCase(repositories.question),
+	getQuestionById: new GetQuestionByIdUseCase(repositories.question),
 	getQuestions: new GetQuestionsUseCase(repositories.question),
 	getThemes: new GetThemesUseCase(repositories.theme),
 	getDifficulties: new GetDifficultiesUseCase(repositories.difficulty),
