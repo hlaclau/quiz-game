@@ -70,7 +70,7 @@ function RouteComponent() {
 	const [themeFilter, setThemeFilter] = useState<string | undefined>(undefined);
 	const [validationFilter, setValidationFilter] =
 		useState<ValidationFilter>("all");
-	const [sortBy] = useState<SortField>("createdAt");
+	const sortBy: SortField = "createdAt";
 	const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
 	const validatedParam =
