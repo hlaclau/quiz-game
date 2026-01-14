@@ -34,6 +34,35 @@ export interface GetDifficultiesResponse {
 }
 
 /**
+ * Question DTO from API
+ */
+export interface QuestionDTO {
+	id: string;
+	content: string;
+	explanation: string | null;
+	difficultyId: string;
+	themeId: string;
+	authorId: string;
+	validated: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface GetQuestionsParams {
+	page?: number;
+	limit?: number;
+	themeId?: string;
+}
+
+export interface GetQuestionsResponse {
+	data: QuestionDTO[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
+}
+
+/**
  * Answer input for creating a question
  */
 export interface CreateAnswerInput {
@@ -76,8 +105,22 @@ export const api = {
 			return response.json();
 		},
 	},
-	//todo: fix error 500
 	questions: {
+		getAll: async (
+			params: GetQuestionsParams = {},
+		): Promise<GetQuestionsResponse> => {
+			const searchParams = new URLSearchParams();
+			if (params.page) searchParams.set("page", params.page.toString());
+			if (params.limit) searchParams.set("limit", params.limit.toString());
+			if (params.themeId) searchParams.set("themeId", params.themeId);
+
+			const url = `${API_URL}/api/questions${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error("Failed to fetch questions");
+			}
+			return response.json();
+		},
 		create: async (input: CreateQuestionInput): Promise<void> => {
 			const response = await fetch(`${API_URL}/api/questions`, {
 				method: "POST",
