@@ -1,4 +1,4 @@
-name: Code Check
+name: Run biome check and format
 
 on:
   pull_request:
