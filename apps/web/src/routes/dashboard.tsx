@@ -272,6 +272,7 @@ function RouteComponent() {
 													onCheckedChange={(checked) =>
 														handleSetValidation(question.id, checked)
 													}
+													aria-label="Toggle validation status for question"
 												/>
 											</TableCell>
 										</TableRow>
