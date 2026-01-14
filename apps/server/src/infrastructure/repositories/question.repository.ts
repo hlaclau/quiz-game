@@ -133,7 +133,10 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 
 		// Build where conditions
 		const conditions = [
-			[Boolean(filter.themeId), () => eq(questionTable.themeId, filter.themeId!)],
+			[
+				Boolean(filter.themeId),
+				() => eq(questionTable.themeId, filter.themeId!),
+			],
 			[
 				filter.validated !== undefined,
 				() => eq(questionTable.validated, filter.validated!),

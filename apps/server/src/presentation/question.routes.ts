@@ -30,18 +30,14 @@ export const createQuestionRoutes = (
 			async ({ query }) => {
 				const page = query.page ?? 1;
 				const limit = query.limit ?? 10;
-				const themeId = query.themeId;
-				const validated = query.validated;
-				const sortBy = query.sortBy;
-				const sortOrder = query.sortOrder;
 
 				return getQuestionsUseCase.execute({
 					page,
 					limit,
-					themeId,
-					validated,
-					sortBy,
-					sortOrder,
+					themeId: query.themeId,
+					validated: query.validated,
+					sortBy: query.sortBy,
+					sortOrder: query.sortOrder,
 				});
 			},
 			{
