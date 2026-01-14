@@ -13,6 +13,7 @@ import { Route as SubmitQuestionRouteImport } from './routes/submit-question'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QuestionsIdRouteImport } from './routes/questions.$id'
 
 const SubmitQuestionRoute = SubmitQuestionRouteImport.update({
   id: '/submit-question',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestionsIdRoute = QuestionsIdRouteImport.update({
+  id: '/questions/$id',
+  path: '/questions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/submit-question': typeof SubmitQuestionRoute
+  '/questions/$id': typeof QuestionsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/submit-question': typeof SubmitQuestionRoute
+  '/questions/$id': typeof QuestionsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,25 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/submit-question': typeof SubmitQuestionRoute
+  '/questions/$id': typeof QuestionsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/submit-question'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/submit-question'
+    | '/questions/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/submit-question'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/submit-question'
+  to: '/' | '/dashboard' | '/login' | '/submit-question' | '/questions/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/submit-question'
+    | '/questions/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +87,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   SubmitQuestionRoute: typeof SubmitQuestionRoute
+  QuestionsIdRoute: typeof QuestionsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/questions/$id': {
+      id: '/questions/$id'
+      path: '/questions/$id'
+      fullPath: '/questions/$id'
+      preLoaderRoute: typeof QuestionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +135,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   SubmitQuestionRoute: SubmitQuestionRoute,
+  QuestionsIdRoute: QuestionsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

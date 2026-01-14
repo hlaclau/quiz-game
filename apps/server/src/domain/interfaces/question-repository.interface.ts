@@ -1,3 +1,4 @@
+import type { Answer } from "../entities/answer";
 import type { Question } from "../entities/question";
 
 /**
@@ -45,12 +46,20 @@ export interface PaginatedResult<T> {
 }
 
 /**
+ * Question with its answers
+ */
+export interface QuestionWithAnswers {
+	question: Question;
+	answers: Answer[];
+}
+
+/**
  * Question Repository Interface
  * Defines the contract for question data access
  */
 export interface IQuestionRepository {
 	create(input: CreateQuestionInput): Promise<Question>;
-	findById(id: string): Promise<Question | null>;
+	findById(id: string): Promise<QuestionWithAnswers | null>;
 	findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,

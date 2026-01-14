@@ -34,6 +34,16 @@ export interface GetDifficultiesResponse {
 }
 
 /**
+ * Answer DTO from API
+ */
+export interface AnswerDTO {
+	id: string;
+	content: string;
+	isCorrect: boolean;
+	createdAt: string;
+}
+
+/**
  * Question DTO from API
  */
 export interface QuestionDTO {
@@ -48,6 +58,13 @@ export interface QuestionDTO {
 	updatedAt: string;
 }
 
+/**
+ * Question with answers DTO from API
+ */
+export interface QuestionWithAnswersDTO extends QuestionDTO {
+	answers: AnswerDTO[];
+}
+
 export interface GetQuestionsParams {
 	page?: number;
 	limit?: number;
@@ -60,6 +77,10 @@ export interface GetQuestionsResponse {
 	page: number;
 	limit: number;
 	totalPages: number;
+}
+
+export interface GetQuestionByIdResponse {
+	data: QuestionWithAnswersDTO | null;
 }
 
 /**
@@ -118,6 +139,16 @@ export const api = {
 			const response = await fetch(url);
 			if (!response.ok) {
 				throw new Error("Failed to fetch questions");
+			}
+			return response.json();
+		},
+		getById: async (id: string): Promise<GetQuestionByIdResponse> => {
+			const response = await fetch(`${API_URL}/api/questions/${id}`);
+			if (!response.ok) {
+				if (response.status === 404) {
+					return { data: null };
+				}
+				throw new Error("Failed to fetch question");
 			}
 			return response.json();
 		},

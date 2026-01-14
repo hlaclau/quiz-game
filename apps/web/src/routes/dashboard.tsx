@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,7 @@ function SkeletonRow() {
 
 function RouteComponent() {
 	const { session } = Route.useRouteContext();
+	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
 	const [themeFilter, setThemeFilter] = useState<string | undefined>(undefined);
 
@@ -152,7 +153,16 @@ function RouteComponent() {
 								questionsData?.data.map((question) => {
 									const theme = themeMap.get(question.themeId);
 									return (
-										<TableRow key={question.id}>
+										<TableRow
+											key={question.id}
+											className="cursor-pointer hover:bg-muted/50"
+											onClick={() =>
+												navigate({
+													to: "/questions/$id",
+													params: { id: question.id },
+												})
+											}
+										>
 											<TableCell className="font-medium">
 												{question.content.length > 80
 													? `${question.content.substring(0, 80)}...`

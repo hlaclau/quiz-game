@@ -4,6 +4,7 @@ import {
 	question as questionTable,
 	questionTag as questionTagTable,
 } from "@quiz-game/db/schema/index";
+import { Answer } from "../../domain/entities/answer";
 import { Question } from "../../domain/entities/question";
 import type {
 	CreateQuestionInput,
@@ -11,6 +12,7 @@ import type {
 	IQuestionRepository,
 	PaginatedResult,
 	PaginationOptions,
+	QuestionWithAnswers,
 } from "../../domain/interfaces/question-repository.interface";
 
 /**
@@ -80,27 +82,44 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 		});
 	}
 
-	async findById(id: string): Promise<Question | null> {
-		const rows = await this.db
+	async findById(id: string): Promise<QuestionWithAnswers | null> {
+		const questionRows = await this.db
 			.select()
 			.from(questionTable)
 			.where(eq(questionTable.id, id))
 			.limit(1);
 
-		const row = rows[0];
-		if (!row) return null;
+		const questionRow = questionRows[0];
+		if (!questionRow) return null;
 
-		return Question.create({
-			id: row.id,
-			content: row.content,
-			explanation: row.explanation,
-			difficultyId: row.difficultyId,
-			themeId: row.themeId,
-			authorId: row.authorId,
-			validated: row.validated,
-			createdAt: row.createdAt,
-			updatedAt: row.updatedAt,
+		const answerRows = await this.db
+			.select()
+			.from(answerTable)
+			.where(eq(answerTable.questionId, id));
+
+		const question = Question.create({
+			id: questionRow.id,
+			content: questionRow.content,
+			explanation: questionRow.explanation,
+			difficultyId: questionRow.difficultyId,
+			themeId: questionRow.themeId,
+			authorId: questionRow.authorId,
+			validated: questionRow.validated,
+			createdAt: questionRow.createdAt,
+			updatedAt: questionRow.updatedAt,
 		});
+
+		const answers = answerRows.map((row) =>
+			Answer.create({
+				id: row.id,
+				content: row.content,
+				isCorrect: row.isCorrect,
+				questionId: row.questionId,
+				createdAt: row.createdAt,
+			}),
+		);
+
+		return { question, answers };
 	}
 
 	async findAll(

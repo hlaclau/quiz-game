@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { GetQuestionByIdUseCase } from "../../../application/use-cases/get-question-by-id/get-question-by-id.use-case";
+import { Answer } from "../../../domain/entities/answer";
 import { Question } from "../../../domain/entities/question";
-import type { IQuestionRepository } from "../../../domain/interfaces/question-repository.interface";
+import type {
+	IQuestionRepository,
+	QuestionWithAnswers,
+} from "../../../domain/interfaces/question-repository.interface";
 
 describe("GetQuestionByIdUseCase", () => {
 	let useCase: GetQuestionByIdUseCase;
@@ -19,10 +23,48 @@ describe("GetQuestionByIdUseCase", () => {
 		updatedAt: new Date("2024-01-01"),
 	});
 
+	const mockAnswers = [
+		Answer.create({
+			id: "answer-1",
+			content: "3",
+			isCorrect: false,
+			questionId: "question-123",
+			createdAt: new Date("2024-01-01"),
+		}),
+		Answer.create({
+			id: "answer-2",
+			content: "4",
+			isCorrect: true,
+			questionId: "question-123",
+			createdAt: new Date("2024-01-01"),
+		}),
+		Answer.create({
+			id: "answer-3",
+			content: "5",
+			isCorrect: false,
+			questionId: "question-123",
+			createdAt: new Date("2024-01-01"),
+		}),
+		Answer.create({
+			id: "answer-4",
+			content: "6",
+			isCorrect: false,
+			questionId: "question-123",
+			createdAt: new Date("2024-01-01"),
+		}),
+	];
+
+	const mockQuestionWithAnswers: QuestionWithAnswers = {
+		question: mockQuestion,
+		answers: mockAnswers,
+	};
+
 	beforeEach(() => {
 		mockRepository = {
-			findById: mock(() => Promise.resolve(mockQuestion)),
-		} as IQuestionRepository;
+			create: mock(() => Promise.resolve(mockQuestion)),
+			findById: mock(() => Promise.resolve(mockQuestionWithAnswers)),
+			findAll: mock(() => Promise.resolve({ data: [], total: 0 })),
+		};
 		useCase = new GetQuestionByIdUseCase(mockRepository);
 	});
 
@@ -47,6 +89,32 @@ describe("GetQuestionByIdUseCase", () => {
 				validated: mockQuestion.validated,
 				createdAt: mockQuestion.createdAt.toISOString(),
 				updatedAt: mockQuestion.updatedAt.toISOString(),
+				answers: [
+					{
+						id: "answer-1",
+						content: "3",
+						isCorrect: false,
+						createdAt: "2024-01-01T00:00:00.000Z",
+					},
+					{
+						id: "answer-2",
+						content: "4",
+						isCorrect: true,
+						createdAt: "2024-01-01T00:00:00.000Z",
+					},
+					{
+						id: "answer-3",
+						content: "5",
+						isCorrect: false,
+						createdAt: "2024-01-01T00:00:00.000Z",
+					},
+					{
+						id: "answer-4",
+						content: "6",
+						isCorrect: false,
+						createdAt: "2024-01-01T00:00:00.000Z",
+					},
+				],
 			});
 		});
 
@@ -86,7 +154,10 @@ describe("GetQuestionByIdUseCase", () => {
 				updatedAt: new Date("2024-01-01"),
 			});
 			mockRepository.findById = mock(() =>
-				Promise.resolve(questionWithNullExplanation),
+				Promise.resolve({
+					question: questionWithNullExplanation,
+					answers: mockAnswers,
+				}),
 			);
 
 			const result = await useCase.execute({ id: "question-456" });
@@ -102,19 +173,47 @@ describe("GetQuestionByIdUseCase", () => {
 
 		it("should return unvalidated status correctly", async () => {
 			const unvalidatedQuestion = Question.create({
-				...mockQuestion,
 				id: "question-789",
+				content: "What is 2 + 2?",
+				explanation: "Basic math",
+				difficultyId: "diff-1",
+				themeId: "theme-1",
+				authorId: "author-1",
 				validated: false,
 				createdAt: new Date("2024-01-01"),
 				updatedAt: new Date("2024-01-01"),
 			});
 			mockRepository.findById = mock(() =>
-				Promise.resolve(unvalidatedQuestion),
+				Promise.resolve({
+					question: unvalidatedQuestion,
+					answers: mockAnswers,
+				}),
 			);
 
 			const result = await useCase.execute({ id: "question-789" });
 
 			expect(result.data?.validated).toBe(false);
+		});
+
+		it("should return answers with correct one marked", async () => {
+			const result = await useCase.execute({ id: "question-123" });
+
+			expect(result.data?.answers).toHaveLength(4);
+			const correctAnswer = result.data?.answers.find((a) => a.isCorrect);
+			expect(correctAnswer).toBeDefined();
+			expect(correctAnswer?.content).toBe("4");
+		});
+
+		it("should map all answer fields correctly", async () => {
+			const result = await useCase.execute({ id: "question-123" });
+
+			const firstAnswer = result.data?.answers[0];
+			expect(firstAnswer).toEqual({
+				id: "answer-1",
+				content: "3",
+				isCorrect: false,
+				createdAt: "2024-01-01T00:00:00.000Z",
+			});
 		});
 	});
 });

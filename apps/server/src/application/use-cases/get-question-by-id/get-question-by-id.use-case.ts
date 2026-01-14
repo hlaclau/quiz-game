@@ -1,15 +1,32 @@
-import type { Question } from "../../../domain/entities/question";
-import type { IQuestionRepository } from "../../../domain/interfaces/question-repository.interface";
-import type { QuestionDTO } from "../../dtos/question.dto";
+import type { Answer } from "../../../domain/entities/answer";
+import type {
+	IQuestionRepository,
+	QuestionWithAnswers,
+} from "../../../domain/interfaces/question-repository.interface";
+import type { AnswerDTO } from "../../dtos/answer.dto";
 import type {
 	GetQuestionByIdInput,
 	GetQuestionByIdOutput,
+	QuestionWithAnswersDTO,
 } from "./get-question-by-id.types";
 
 /**
- * Maps a Question entity to a QuestionDTO
+ * Maps an Answer entity to an AnswerDTO
  */
-function toDTO(question: Question): QuestionDTO {
+function answerToDTO(answer: Answer): AnswerDTO {
+	return {
+		id: answer.id,
+		content: answer.content,
+		isCorrect: answer.isCorrect,
+		createdAt: answer.createdAt.toISOString(),
+	};
+}
+
+/**
+ * Maps a QuestionWithAnswers to a QuestionWithAnswersDTO
+ */
+function toDTO(data: QuestionWithAnswers): QuestionWithAnswersDTO {
+	const { question, answers } = data;
 	return {
 		id: question.id,
 		content: question.content,
@@ -20,6 +37,7 @@ function toDTO(question: Question): QuestionDTO {
 		validated: question.validated,
 		createdAt: question.createdAt.toISOString(),
 		updatedAt: question.updatedAt.toISOString(),
+		answers: answers.map(answerToDTO),
 	};
 }
 
@@ -31,10 +49,10 @@ export class GetQuestionByIdUseCase {
 	constructor(private readonly questionRepository: IQuestionRepository) {}
 
 	async execute(input: GetQuestionByIdInput): Promise<GetQuestionByIdOutput> {
-		const question = await this.questionRepository.findById(input.id);
+		const result = await this.questionRepository.findById(input.id);
 
 		return {
-			data: question ? toDTO(question) : null,
+			data: result ? toDTO(result) : null,
 		};
 	}
 }
