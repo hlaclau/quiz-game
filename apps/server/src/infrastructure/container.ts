@@ -2,6 +2,7 @@ import { db } from "@quiz-game/db";
 import {
 	CreateQuestionUseCase,
 	GetDifficultiesUseCase,
+	GetQuestionsUseCase,
 	GetThemesUseCase,
 } from "../application/use-cases";
 import { DrizzleDifficultyRepository } from "./repositories/difficulty.repository";
@@ -22,6 +23,7 @@ const repositories = {
  */
 export const useCases = {
 	createQuestion: new CreateQuestionUseCase(repositories.question),
+	getQuestions: new GetQuestionsUseCase(repositories.question),
 	getThemes: new GetThemesUseCase(repositories.theme),
 	getDifficulties: new GetDifficultiesUseCase(repositories.difficulty),
 };

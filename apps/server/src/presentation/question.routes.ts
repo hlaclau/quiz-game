@@ -1,5 +1,8 @@
 import { Elysia, t } from "elysia";
-import type { CreateQuestionUseCase } from "../application/use-cases";
+import type {
+	CreateQuestionUseCase,
+	GetQuestionsUseCase,
+} from "../application/use-cases";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
 
 /**
@@ -7,6 +10,7 @@ import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
  */
 export const createQuestionRoutes = (
 	createQuestionUseCase: CreateQuestionUseCase,
+	getQuestionsUseCase: GetQuestionsUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/questions" })
 		.onError(({ code, set }) => {
@@ -17,6 +21,23 @@ export const createQuestionRoutes = (
 				};
 			}
 		})
+		.get(
+			"/",
+			async ({ query }) => {
+				const page = query.page ?? 1;
+				const limit = query.limit ?? 10;
+				const themeId = query.themeId;
+
+				return getQuestionsUseCase.execute({ page, limit, themeId });
+			},
+			{
+				query: t.Object({
+					page: t.Optional(t.Number({ minimum: 1 })),
+					limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+					themeId: t.Optional(t.String()),
+				}),
+			},
+		)
 		.post(
 			"/",
 			async ({ body, set }) => {

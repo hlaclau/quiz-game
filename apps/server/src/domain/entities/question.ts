@@ -11,6 +11,7 @@ export interface QuestionProps {
 	difficultyId: string;
 	themeId: string;
 	authorId: string;
+	validated: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -59,6 +60,10 @@ export class Question {
 
 	get authorId(): string {
 		return this.props.authorId;
+	}
+
+	get validated(): boolean {
+		return this.props.validated;
 	}
 
 	get createdAt(): Date {

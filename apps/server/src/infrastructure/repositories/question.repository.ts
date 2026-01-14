@@ -1,4 +1,4 @@
-import type { Database } from "@quiz-game/db";
+import { count, type Database, eq } from "@quiz-game/db";
 import {
 	answer as answerTable,
 	question as questionTable,
@@ -7,7 +7,10 @@ import {
 import { Question } from "../../domain/entities/question";
 import type {
 	CreateQuestionInput,
+	FindQuestionsFilter,
 	IQuestionRepository,
+	PaginatedResult,
+	PaginationOptions,
 } from "../../domain/interfaces/question-repository.interface";
 
 /**
@@ -71,8 +74,49 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 			difficultyId: result.difficultyId,
 			themeId: result.themeId,
 			authorId: result.authorId,
+			validated: result.validated,
 			createdAt: result.createdAt,
 			updatedAt: result.updatedAt,
 		});
+	}
+
+	async findAll(
+		filter: FindQuestionsFilter,
+		pagination: PaginationOptions,
+	): Promise<PaginatedResult<Question>> {
+		const { page, limit } = pagination;
+		const offset = (page - 1) * limit;
+
+		const baseQuery = this.db.select().from(questionTable);
+		const countQuery = this.db.select({ count: count() }).from(questionTable);
+
+		const whereCondition = filter.themeId
+			? eq(questionTable.themeId, filter.themeId)
+			: undefined;
+
+		const [rows, countResult] = await Promise.all([
+			whereCondition
+				? baseQuery.where(whereCondition).limit(limit).offset(offset)
+				: baseQuery.limit(limit).offset(offset),
+			whereCondition ? countQuery.where(whereCondition) : countQuery,
+		]);
+
+		const total = countResult[0]?.count ?? 0;
+
+		const data = rows.map((row) =>
+			Question.create({
+				id: row.id,
+				content: row.content,
+				explanation: row.explanation,
+				difficultyId: row.difficultyId,
+				themeId: row.themeId,
+				authorId: row.authorId,
+				validated: row.validated,
+				createdAt: row.createdAt,
+				updatedAt: row.updatedAt,
+			}),
+		);
+
+		return { data, total };
 	}
 }

@@ -13,6 +13,7 @@ describe("Question Entity", () => {
 		difficultyId: "diff-1",
 		themeId: "theme-1",
 		authorId: "author-1",
+		validated: false,
 		createdAt: new Date("2024-01-01"),
 		updatedAt: new Date("2024-01-02"),
 	};
