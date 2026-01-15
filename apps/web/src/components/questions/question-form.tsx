@@ -1,16 +1,22 @@
+import { Check, CircleHelp, Lightbulb, Loader2, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
 	Select,
 	SelectContent,
@@ -21,11 +27,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useThemes } from "@/hooks/use-themes";
 import type { QuestionWithAnswersDTO } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const DIFFICULTY_OPTIONS = [
-	{ name: "easy", label: "Easy" },
-	{ name: "medium", label: "Medium" },
-	{ name: "hard", label: "Hard" },
+	{ name: "easy", label: "Easy", color: "bg-emerald-500" },
+	{ name: "medium", label: "Medium", color: "bg-amber-500" },
+	{ name: "hard", label: "Hard", color: "bg-rose-500" },
 ] as const;
 
 export type QuestionFormValues = {
@@ -103,217 +110,236 @@ export function QuestionForm({
 
 	const buttonLabel =
 		submitLabel ?? (mode === "create" ? "Submit Question" : "Save Changes");
-	const pendingLabel = mode === "create" ? "Submitting..." : "Saving...";
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-				{/* Question Content */}
-				<FormField
-					control={form.control}
-					name="content"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Question</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Enter your question here..."
-									className="min-h-24"
-									{...field}
-								/>
-							</FormControl>
-							<FormDescription>
-								Write a clear and concise question.
-							</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{/* Theme Selection */}
-				<FormField
-					control={form.control}
-					name="themeId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Theme</FormLabel>
-							<Select
-								onValueChange={field.onChange}
-								value={field.value}
-								disabled={isLoadingThemes}
-							>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue
-											placeholder={
-												isLoadingThemes ? "Loading themes..." : "Select a theme"
-											}
-										/>
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{themes.map((theme) => (
-										<SelectItem key={theme.id} value={theme.id}>
-											{theme.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormDescription>
-								Choose the category that best fits your question.
-							</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{/* Difficulty Selection */}
-				<FormField
-					control={form.control}
-					name="difficultyName"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Difficulty</FormLabel>
-							<FormControl>
-								<RadioGroup
-									onValueChange={field.onChange}
-									value={field.value}
-									className="flex gap-4"
-								>
-									{DIFFICULTY_OPTIONS.map((option) => (
-										<FormItem
-											key={option.name}
-											className="flex items-center space-x-2 space-y-0"
-										>
-											<FormControl>
-												<RadioGroupItem value={option.name} />
-											</FormControl>
-											<FormLabel className="cursor-pointer font-normal">
-												{option.label}
-											</FormLabel>
-										</FormItem>
-									))}
-								</RadioGroup>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{/* Answers Section */}
-				<div className="space-y-4">
-					<div>
-						<FormLabel>Answers</FormLabel>
-						<FormDescription>
-							Provide the correct answer and 3 wrong answers.
-						</FormDescription>
-					</div>
-
-					{/* Correct Answer */}
-					<FormField
-						control={form.control}
-						name="correctAnswer"
-						render={({ field }) => (
-							<FormItem>
-								<div className="rounded-lg border border-green-500 bg-green-50 p-4 dark:bg-green-950">
-									<FormLabel className="mb-2 block text-green-700 dark:text-green-300">
-										Correct Answer
-									</FormLabel>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				{/* Question Content Card */}
+				<Card>
+					<CardHeader className="pb-4">
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<CircleHelp className="size-5 text-primary" />
+							Question
+						</CardTitle>
+						<CardDescription>
+							Write a clear and concise question for players to answer.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<FormField
+							control={form.control}
+							name="content"
+							render={({ field }) => (
+								<FormItem>
 									<FormControl>
-										<Input
-											placeholder="Enter the correct answer..."
-											className="border-green-300 dark:border-green-700"
+										<Textarea
+											placeholder="Enter your question here..."
+											className="min-h-28 resize-none text-base"
 											{...field}
 										/>
 									</FormControl>
 									<FormMessage />
-								</div>
-							</FormItem>
-						)}
-					/>
+								</FormItem>
+							)}
+						/>
 
-					{/* Wrong Answers */}
-					<FormField
-						control={form.control}
-						name="wrongAnswer1"
-						render={({ field }) => (
-							<FormItem>
-								<div className="rounded-lg border p-4">
-									<FormLabel className="mb-2 block">Wrong Answer 1</FormLabel>
-									<FormControl>
-										<Input placeholder="Enter a wrong answer..." {...field} />
-									</FormControl>
+						{/* Theme & Difficulty Row */}
+						<div className="grid gap-4 sm:grid-cols-2">
+							<FormField
+								control={form.control}
+								name="themeId"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-muted-foreground text-xs uppercase tracking-wide">
+											Theme
+										</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											value={field.value}
+											disabled={isLoadingThemes}
+										>
+											<FormControl>
+												<SelectTrigger className="w-full">
+													<SelectValue
+														placeholder={
+															isLoadingThemes ? "Loading..." : "Select a theme"
+														}
+													/>
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{themes.map((theme) => (
+													<SelectItem key={theme.id} value={theme.id}>
+														{theme.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="difficultyName"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-muted-foreground text-xs uppercase tracking-wide">
+											Difficulty
+										</FormLabel>
+										<div className="flex gap-2">
+											{DIFFICULTY_OPTIONS.map((option) => {
+												const isSelected = field.value === option.name;
+												return (
+													<button
+														key={option.name}
+														type="button"
+														onClick={() => field.onChange(option.name)}
+														className={cn(
+															"flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 px-3 py-2 font-medium text-sm transition-all",
+															isSelected
+																? "border-primary bg-primary/10 text-primary"
+																: "border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-muted",
+														)}
+													>
+														<span
+															className={cn(
+																"size-2 rounded-full",
+																option.color,
+															)}
+														/>
+														{option.label}
+													</button>
+												);
+											})}
+										</div>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Answers Card */}
+				<Card>
+					<CardHeader className="pb-4">
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<Check className="size-5 text-emerald-500" />
+							Answers
+						</CardTitle>
+						<CardDescription>
+							Enter one correct answer and three wrong answers.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-3">
+						{/* Correct Answer */}
+						<FormField
+							control={form.control}
+							name="correctAnswer"
+							render={({ field }) => (
+								<FormItem>
+									<div className="flex items-center gap-3 rounded-lg border-2 border-emerald-500/50 bg-emerald-500/5 p-3 transition-colors focus-within:border-emerald-500 dark:bg-emerald-500/10">
+										<div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+											<Check className="size-4" />
+										</div>
+										<FormControl>
+											<Input
+												placeholder="Enter the correct answer..."
+												className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
+												{...field}
+											/>
+										</FormControl>
+									</div>
 									<FormMessage />
-								</div>
-							</FormItem>
-						)}
-					/>
+								</FormItem>
+							)}
+						/>
 
-					<FormField
-						control={form.control}
-						name="wrongAnswer2"
-						render={({ field }) => (
-							<FormItem>
-								<div className="rounded-lg border p-4">
-									<FormLabel className="mb-2 block">Wrong Answer 2</FormLabel>
-									<FormControl>
-										<Input placeholder="Enter a wrong answer..." {...field} />
-									</FormControl>
-									<FormMessage />
-								</div>
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="wrongAnswer3"
-						render={({ field }) => (
-							<FormItem>
-								<div className="rounded-lg border p-4">
-									<FormLabel className="mb-2 block">Wrong Answer 3</FormLabel>
-									<FormControl>
-										<Input placeholder="Enter a wrong answer..." {...field} />
-									</FormControl>
-									<FormMessage />
-								</div>
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				{/* Explanation */}
-				<FormField
-					control={form.control}
-					name="explanation"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>
-								Explanation{" "}
-								<span className="text-muted-foreground">(optional)</span>
-							</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Explain why the correct answer is correct..."
-									className="min-h-20"
-									{...field}
+						{/* Wrong Answers */}
+						{(["wrongAnswer1", "wrongAnswer2", "wrongAnswer3"] as const).map(
+							(name, index) => (
+								<FormField
+									key={name}
+									control={form.control}
+									name={name}
+									render={({ field }) => (
+										<FormItem>
+											<div className="flex items-center gap-3 rounded-lg border-2 border-transparent bg-muted/50 p-3 transition-colors focus-within:border-border focus-within:bg-background">
+												<div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted-foreground/20 text-muted-foreground">
+													<X className="size-4" />
+												</div>
+												<FormControl>
+													<Input
+														placeholder={`Wrong answer ${index + 1}...`}
+														className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
+														{...field}
+													/>
+												</FormControl>
+											</div>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
-							</FormControl>
-							<FormDescription>
-								Provide additional context or explanation for the answer.
-							</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+							),
+						)}
+					</CardContent>
+				</Card>
+
+				{/* Explanation Card */}
+				<Card>
+					<CardHeader className="pb-4">
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<Lightbulb className="size-5 text-amber-500" />
+							Explanation
+							<span className="ml-1 font-normal text-muted-foreground text-sm">
+								(optional)
+							</span>
+						</CardTitle>
+						<CardDescription>
+							Help players learn by explaining the correct answer.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<FormField
+							control={form.control}
+							name="explanation"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Textarea
+											placeholder="Explain why the correct answer is correct..."
+											className="min-h-24 resize-none"
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</CardContent>
+				</Card>
 
 				{/* Submit Buttons */}
-				<div className="flex justify-end gap-4">
-					<Button type="button" variant="outline" onClick={onCancel}>
+				<div className="flex items-center justify-end gap-3 pt-2">
+					<Button
+						type="button"
+						variant="ghost"
+						onClick={onCancel}
+						disabled={isSubmitting}
+					>
 						Cancel
 					</Button>
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? pendingLabel : buttonLabel}
+					<Button type="submit" disabled={isSubmitting} className="min-w-32">
+						{isSubmitting ? (
+							<>
+								<Loader2 className="mr-2 size-4 animate-spin" />
+								Saving...
+							</>
+						) : (
+							buttonLabel
+						)}
 					</Button>
 				</div>
 			</form>
