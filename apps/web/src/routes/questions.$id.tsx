@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, Pencil, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -113,6 +113,12 @@ function RouteComponent() {
 							: question.validated
 								? "Unvalidate"
 								: "Validate"}
+					</Button>
+					<Button size="sm" variant="outline" asChild>
+						<Link to="/questions/$id/edit" params={{ id }}>
+							<Pencil className="mr-1 h-4 w-4" />
+							Edit
+						</Link>
 					</Button>
 				</div>
 				<p className="mt-1 text-muted-foreground text-sm">

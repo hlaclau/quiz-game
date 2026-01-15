@@ -36,6 +36,7 @@
 		"@biomejs/biome": "^2.2.0",
 		"@types/bun": "^1.2.6",
 		"husky": "^9.1.7",
+		"shadcn": "^3.6.3",
 		"turbo": "^2.5.4"
 	},
 	"packageManager": "bun@1.2.22"
