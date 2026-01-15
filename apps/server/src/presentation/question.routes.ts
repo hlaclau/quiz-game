@@ -8,13 +8,10 @@ import type {
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
 
 /**
- * Question Routes
+ * Public Question Routes - for submitting questions
  */
 export const createQuestionRoutes = (
 	createQuestionUseCase: CreateQuestionUseCase,
-	getQuestionByIdUseCase: GetQuestionByIdUseCase,
-	getQuestionsUseCase: GetQuestionsUseCase,
-	setQuestionValidationUseCase: SetQuestionValidationUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/questions" })
 		.onError(({ code, set }) => {
@@ -25,6 +22,44 @@ export const createQuestionRoutes = (
 				};
 			}
 		})
+		.post(
+			"/",
+			async ({ body, set }) => {
+				await createQuestionUseCase.execute(body);
+				set.status = 201;
+			},
+			{
+				body: t.Object({
+					content: t.String({ minLength: 1 }),
+					explanation: t.Optional(t.Union([t.String(), t.Null()])),
+					difficultyId: t.String({ minLength: 1 }),
+					themeId: t.String({ minLength: 1 }),
+					authorId: t.String({ minLength: 1 }),
+					answers: t.Array(
+						t.Object({
+							content: t.String({ minLength: 1 }),
+							isCorrect: t.Boolean(),
+						}),
+						{
+							minItems: REQUIRED_ANSWERS_COUNT,
+							maxItems: REQUIRED_ANSWERS_COUNT,
+						},
+					),
+					tagIds: t.Optional(t.Array(t.String())),
+				}),
+			},
+		);
+};
+
+/**
+ * Admin Question Routes - for managing questions
+ */
+export const createAdminQuestionRoutes = (
+	getQuestionByIdUseCase: GetQuestionByIdUseCase,
+	getQuestionsUseCase: GetQuestionsUseCase,
+	setQuestionValidationUseCase: SetQuestionValidationUseCase,
+) => {
+	return new Elysia({ prefix: "/api/admin/questions" })
 		.get(
 			"/",
 			async ({ query }) => {
@@ -66,33 +101,6 @@ export const createQuestionRoutes = (
 			{
 				params: t.Object({
 					id: t.String(),
-				}),
-			},
-		)
-		.post(
-			"/",
-			async ({ body, set }) => {
-				await createQuestionUseCase.execute(body);
-				set.status = 201;
-			},
-			{
-				body: t.Object({
-					content: t.String({ minLength: 1 }),
-					explanation: t.Optional(t.Union([t.String(), t.Null()])),
-					difficultyId: t.String({ minLength: 1 }),
-					themeId: t.String({ minLength: 1 }),
-					authorId: t.String({ minLength: 1 }),
-					answers: t.Array(
-						t.Object({
-							content: t.String({ minLength: 1 }),
-							isCorrect: t.Boolean(),
-						}),
-						{
-							minItems: REQUIRED_ANSWERS_COUNT,
-							maxItems: REQUIRED_ANSWERS_COUNT,
-						},
-					),
-					tagIds: t.Optional(t.Array(t.String())),
 				}),
 			},
 		)
