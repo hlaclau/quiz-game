@@ -1,7 +1,10 @@
 import { Elysia } from "elysia";
 import { useCases } from "../infrastructure/container";
 import { createDifficultyRoutes } from "./difficulty.routes";
-import { createQuestionRoutes } from "./question.routes";
+import {
+	createAdminQuestionRoutes,
+	createQuestionRoutes,
+} from "./question.routes";
 import { createThemeRoutes } from "./theme.routes";
 
 /**
@@ -9,9 +12,9 @@ import { createThemeRoutes } from "./theme.routes";
  */
 export const routes = new Elysia()
 	.use(createThemeRoutes(useCases.getThemes))
+	.use(createQuestionRoutes(useCases.createQuestion))
 	.use(
-		createQuestionRoutes(
-			useCases.createQuestion,
+		createAdminQuestionRoutes(
 			useCases.getQuestionById,
 			useCases.getQuestions,
 			useCases.setQuestionValidation,

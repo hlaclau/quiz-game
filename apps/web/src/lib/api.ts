@@ -145,7 +145,7 @@ export const api = {
 			if (params.sortBy) searchParams.set("sortBy", params.sortBy);
 			if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
 
-			const url = `${API_URL}/api/questions${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+			const url = `${API_URL}/api/admin/questions${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 			const response = await fetch(url);
 			if (!response.ok) {
 				throw new Error("Failed to fetch questions");
@@ -153,7 +153,7 @@ export const api = {
 			return response.json();
 		},
 		getById: async (id: string): Promise<GetQuestionByIdResponse> => {
-			const response = await fetch(`${API_URL}/api/questions/${id}`);
+			const response = await fetch(`${API_URL}/api/admin/questions/${id}`);
 			if (!response.ok) {
 				if (response.status === 404) {
 					return { data: null };
@@ -180,7 +180,7 @@ export const api = {
 			validated: boolean,
 		): Promise<QuestionDTO> => {
 			const response = await fetch(
-				`${API_URL}/api/questions/${id}/validation`,
+				`${API_URL}/api/admin/questions/${id}/validation`,
 				{
 					method: "PATCH",
 					headers: {
