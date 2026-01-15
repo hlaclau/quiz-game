@@ -1,47 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+	QuestionForm,
+	type QuestionFormValues,
+} from "@/components/questions/question-form";
 import { getUser } from "@/functions/get-user";
-import { useThemes } from "@/hooks/use-themes";
+import { useDifficulties } from "@/hooks/use-difficulties";
 import { api } from "@/lib/api";
-
-const DIFFICULTY_OPTIONS = [
-	{ name: "easy", label: "Easy" },
-	{ name: "medium", label: "Medium" },
-	{ name: "hard", label: "Hard" },
-] as const;
-
-type FormValues = {
-	content: string;
-	explanation: string;
-	themeId: string;
-	difficultyId: string;
-	correctAnswer: string;
-	wrongAnswer1: string;
-	wrongAnswer2: string;
-	wrongAnswer3: string;
-};
 
 export const Route = createFileRoute("/submit-question")({
 	component: RouteComponent,
@@ -60,7 +26,7 @@ function RouteComponent() {
 	const { session } = Route.useRouteContext();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { data: themesData, isLoading: isLoadingThemes } = useThemes();
+	const { data: difficultiesData } = useDifficulties();
 
 	const createQuestionMutation = useMutation({
 		mutationFn: api.questions.create,
@@ -74,21 +40,9 @@ function RouteComponent() {
 		},
 	});
 
-	const form = useForm<FormValues>({
-		defaultValues: {
-			content: "",
-			explanation: "",
-			themeId: "",
-			difficultyId: "",
-			correctAnswer: "",
-			wrongAnswer1: "",
-			wrongAnswer2: "",
-			wrongAnswer3: "",
-		},
-	});
+	const difficulties = difficultiesData?.data ?? [];
 
-	async function onSubmit(values: FormValues) {
-		// Validation
+	async function handleSubmit(values: QuestionFormValues) {
 		if (values.content.length < 10) {
 			toast.error("Question must be at least 10 characters");
 			return;
@@ -97,7 +51,7 @@ function RouteComponent() {
 			toast.error("Please select a theme");
 			return;
 		}
-		if (!values.difficultyId) {
+		if (!values.difficultyName) {
 			toast.error("Please select a difficulty");
 			return;
 		}
@@ -111,10 +65,8 @@ function RouteComponent() {
 			return;
 		}
 
-		// Fetch difficulties to get the GUID for the selected difficulty
-		const difficultiesResponse = await api.difficulties.getAll();
-		const selectedDifficulty = difficultiesResponse.data.find(
-			(d) => d.name.toLowerCase() === values.difficultyId.toLowerCase(),
+		const selectedDifficulty = difficulties.find(
+			(d) => d.name.toLowerCase() === values.difficultyName.toLowerCase(),
 		);
 
 		if (!selectedDifficulty) {
@@ -139,8 +91,6 @@ function RouteComponent() {
 		});
 	}
 
-	const themes = themesData?.data ?? [];
-
 	return (
 		<div className="container mx-auto px-4 py-8">
 			<div className="mx-auto max-w-2xl">
@@ -151,241 +101,12 @@ function RouteComponent() {
 					</p>
 				</div>
 
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-						{/* Question Content */}
-						<FormField
-							control={form.control}
-							name="content"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Question</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Enter your question here..."
-											className="min-h-24"
-											{...field}
-										/>
-									</FormControl>
-									<FormDescription>
-										Write a clear and concise question.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						{/* Theme Selection */}
-						<FormField
-							control={form.control}
-							name="themeId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Theme</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-										disabled={isLoadingThemes}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue
-													placeholder={
-														isLoadingThemes
-															? "Loading themes..."
-															: "Select a theme"
-													}
-												/>
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{themes.map((theme) => (
-												<SelectItem key={theme.id} value={theme.id}>
-													{theme.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormDescription>
-										Choose the category that best fits your question.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						{/* Difficulty Selection */}
-						<FormField
-							control={form.control}
-							name="difficultyId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Difficulty</FormLabel>
-									<FormControl>
-										<RadioGroup
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-											className="flex gap-4"
-										>
-											{DIFFICULTY_OPTIONS.map((option) => (
-												<FormItem
-													key={option.name}
-													className="flex items-center space-x-2 space-y-0"
-												>
-													<FormControl>
-														<RadioGroupItem value={option.name} />
-													</FormControl>
-													<FormLabel className="cursor-pointer font-normal">
-														{option.label}
-													</FormLabel>
-												</FormItem>
-											))}
-										</RadioGroup>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						{/* Answers Section */}
-						<div className="space-y-4">
-							<div>
-								<FormLabel>Answers</FormLabel>
-								<FormDescription>
-									Provide the correct answer and 3 wrong answers.
-								</FormDescription>
-							</div>
-
-							{/* Correct Answer */}
-							<FormField
-								control={form.control}
-								name="correctAnswer"
-								render={({ field }) => (
-									<FormItem>
-										<div className="rounded-lg border border-green-500 bg-green-50 p-4 dark:bg-green-950">
-											<FormLabel className="mb-2 block text-green-700 dark:text-green-300">
-												✓ Correct Answer
-											</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Enter the correct answer..."
-													className="border-green-300 dark:border-green-700"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</div>
-									</FormItem>
-								)}
-							/>
-
-							{/* Wrong Answers */}
-							<FormField
-								control={form.control}
-								name="wrongAnswer1"
-								render={({ field }) => (
-									<FormItem>
-										<div className="rounded-lg border p-4">
-											<FormLabel className="mb-2 block">
-												Wrong Answer 1
-											</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Enter a wrong answer..."
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</div>
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="wrongAnswer2"
-								render={({ field }) => (
-									<FormItem>
-										<div className="rounded-lg border p-4">
-											<FormLabel className="mb-2 block">
-												Wrong Answer 2
-											</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Enter a wrong answer..."
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</div>
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="wrongAnswer3"
-								render={({ field }) => (
-									<FormItem>
-										<div className="rounded-lg border p-4">
-											<FormLabel className="mb-2 block">
-												Wrong Answer 3
-											</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Enter a wrong answer..."
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</div>
-									</FormItem>
-								)}
-							/>
-						</div>
-
-						{/* Explanation */}
-						<FormField
-							control={form.control}
-							name="explanation"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>
-										Explanation{" "}
-										<span className="text-muted-foreground">(optional)</span>
-									</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Explain why the correct answer is correct..."
-											className="min-h-20"
-											{...field}
-										/>
-									</FormControl>
-									<FormDescription>
-										Provide additional context or explanation for the answer.
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						{/* Submit Buttons */}
-						<div className="flex justify-end gap-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => navigate({ to: "/dashboard" })}
-							>
-								Cancel
-							</Button>
-							<Button type="submit" disabled={createQuestionMutation.isPending}>
-								{createQuestionMutation.isPending
-									? "Submitting..."
-									: "Submit Question"}
-							</Button>
-						</div>
-					</form>
-				</Form>
+				<QuestionForm
+					mode="create"
+					onSubmit={handleSubmit}
+					onCancel={() => navigate({ to: "/dashboard" })}
+					isSubmitting={createQuestionMutation.isPending}
+				/>
 			</div>
 		</div>
 	);

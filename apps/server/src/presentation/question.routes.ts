@@ -4,6 +4,7 @@ import type {
 	GetQuestionByIdUseCase,
 	GetQuestionsUseCase,
 	SetQuestionValidationUseCase,
+	UpdateQuestionUseCase,
 } from "../application/use-cases";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
 
@@ -58,8 +59,17 @@ export const createAdminQuestionRoutes = (
 	getQuestionByIdUseCase: GetQuestionByIdUseCase,
 	getQuestionsUseCase: GetQuestionsUseCase,
 	setQuestionValidationUseCase: SetQuestionValidationUseCase,
+	updateQuestionUseCase: UpdateQuestionUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/admin/questions" })
+		.onError(({ code, set }) => {
+			if (code === "VALIDATION") {
+				set.status = 400;
+				return {
+					error: `A question must have exactly ${REQUIRED_ANSWERS_COUNT} answers`,
+				};
+			}
+		})
 		.get(
 			"/",
 			async ({ query }) => {
@@ -101,6 +111,43 @@ export const createAdminQuestionRoutes = (
 			{
 				params: t.Object({
 					id: t.String(),
+				}),
+			},
+		)
+		.patch(
+			"/:id",
+			async ({ params, body, set }) => {
+				const result = await updateQuestionUseCase.execute({
+					id: params.id,
+					...body,
+				});
+				if (!result.data) {
+					set.status = 404;
+					return { error: "Question not found" };
+				}
+				return result;
+			},
+			{
+				params: t.Object({
+					id: t.String(),
+				}),
+				body: t.Object({
+					content: t.String({ minLength: 1 }),
+					explanation: t.Optional(t.Union([t.String(), t.Null()])),
+					difficultyId: t.String({ minLength: 1 }),
+					themeId: t.String({ minLength: 1 }),
+					answers: t.Array(
+						t.Object({
+							id: t.Optional(t.String()),
+							content: t.String({ minLength: 1 }),
+							isCorrect: t.Boolean(),
+						}),
+						{
+							minItems: REQUIRED_ANSWERS_COUNT,
+							maxItems: REQUIRED_ANSWERS_COUNT,
+						},
+					),
+					tagIds: t.Optional(t.Array(t.String())),
 				}),
 			},
 		)

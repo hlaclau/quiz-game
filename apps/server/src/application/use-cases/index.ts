@@ -20,6 +20,12 @@ export {
 } from "./get-questions";
 export { type GetThemesOutput, GetThemesUseCase } from "./get-themes";
 export {
+	type UpdateAnswerInput,
+	type UpdateQuestionInput,
+	type UpdateQuestionOutput,
+	UpdateQuestionUseCase,
+} from "./update-question";
+export {
 	type SetQuestionValidationInput,
 	type SetQuestionValidationOutput,
 	SetQuestionValidationUseCase,

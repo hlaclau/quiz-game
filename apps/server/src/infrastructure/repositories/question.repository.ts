@@ -14,6 +14,7 @@ import type {
 	PaginationOptions,
 	QuestionWithAnswers,
 	SortOptions,
+	UpdateQuestionInput,
 } from "../../domain/interfaces/question-repository.interface";
 
 /**
@@ -81,6 +82,90 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 			createdAt: result.createdAt,
 			updatedAt: result.updatedAt,
 		});
+	}
+
+	async update(
+		input: UpdateQuestionInput,
+	): Promise<QuestionWithAnswers | null> {
+		const now = new Date();
+
+		const result = await this.db.transaction(async (tx) => {
+			// Update question
+			const rows = await tx
+				.update(questionTable)
+				.set({
+					content: input.content,
+					explanation: input.explanation,
+					difficultyId: input.difficultyId,
+					themeId: input.themeId,
+					updatedAt: now,
+				})
+				.where(eq(questionTable.id, input.id))
+				.returning();
+
+			const row = rows[0];
+			if (!row) {
+				return null;
+			}
+
+			// Delete existing answers and insert new ones
+			await tx.delete(answerTable).where(eq(answerTable.questionId, input.id));
+
+			const answerRows = await tx
+				.insert(answerTable)
+				.values(
+					input.answers.map((a) => ({
+						id: a.id ?? crypto.randomUUID(),
+						content: a.content,
+						isCorrect: a.isCorrect,
+						questionId: input.id,
+						createdAt: now,
+					})),
+				)
+				.returning();
+
+			// Update tags if provided
+			await tx
+				.delete(questionTagTable)
+				.where(eq(questionTagTable.questionId, input.id));
+
+			if (input.tagIds && input.tagIds.length > 0) {
+				await tx.insert(questionTagTable).values(
+					input.tagIds.map((tagId) => ({
+						questionId: input.id,
+						tagId,
+					})),
+				);
+			}
+
+			return { questionRow: row, answerRows };
+		});
+
+		if (!result) return null;
+
+		const question = Question.create({
+			id: result.questionRow.id,
+			content: result.questionRow.content,
+			explanation: result.questionRow.explanation,
+			difficultyId: result.questionRow.difficultyId,
+			themeId: result.questionRow.themeId,
+			authorId: result.questionRow.authorId,
+			validated: result.questionRow.validated,
+			createdAt: result.questionRow.createdAt,
+			updatedAt: result.questionRow.updatedAt,
+		});
+
+		const answers = result.answerRows.map((row) =>
+			Answer.create({
+				id: row.id,
+				content: row.content,
+				isCorrect: row.isCorrect,
+				questionId: row.questionId,
+				createdAt: row.createdAt,
+			}),
+		);
+
+		return { question, answers };
 	}
 
 	async findById(id: string): Promise<QuestionWithAnswers | null> {
