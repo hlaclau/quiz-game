@@ -6,6 +6,7 @@ import {
 	GetQuestionsUseCase,
 	GetThemesUseCase,
 	SetQuestionValidationUseCase,
+	UpdateQuestionUseCase,
 } from "../application/use-cases";
 import { DrizzleDifficultyRepository } from "./repositories/difficulty.repository";
 import { DrizzleQuestionRepository } from "./repositories/question.repository";
@@ -25,6 +26,7 @@ const repositories = {
  */
 export const useCases = {
 	createQuestion: new CreateQuestionUseCase(repositories.question),
+	updateQuestion: new UpdateQuestionUseCase(repositories.question),
 	getQuestionById: new GetQuestionByIdUseCase(repositories.question),
 	getQuestions: new GetQuestionsUseCase(repositories.question),
 	getThemes: new GetThemesUseCase(repositories.theme),

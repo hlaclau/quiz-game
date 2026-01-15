@@ -111,6 +111,27 @@ export interface CreateQuestionInput {
 }
 
 /**
+ * Answer input for updating a question
+ */
+export interface UpdateAnswerInput {
+	id?: string;
+	content: string;
+	isCorrect: boolean;
+}
+
+/**
+ * Update question request body
+ */
+export interface UpdateQuestionInput {
+	content: string;
+	explanation: string | null;
+	difficultyId: string;
+	themeId: string;
+	answers: UpdateAnswerInput[];
+	tagIds?: string[];
+}
+
+/**
  * API client for themes
  */
 export const api = {
@@ -174,6 +195,24 @@ export const api = {
 				const error = await response.json().catch(() => ({}));
 				throw new Error(error.error || "Failed to create question");
 			}
+		},
+		update: async (
+			id: string,
+			input: UpdateQuestionInput,
+		): Promise<QuestionWithAnswersDTO> => {
+			const response = await fetch(`${API_URL}/api/admin/questions/${id}`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(input),
+			});
+			if (!response.ok) {
+				const error = await response.json().catch(() => ({}));
+				throw new Error(error.error || "Failed to update question");
+			}
+			const result = await response.json();
+			return result.data;
 		},
 		setValidation: async (
 			id: string,

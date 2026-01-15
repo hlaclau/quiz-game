@@ -23,6 +23,28 @@ export interface CreateQuestionInput {
 }
 
 /**
+ * Answer Input for updating a question
+ */
+export interface UpdateAnswerInput {
+	id?: string;
+	content: string;
+	isCorrect: boolean;
+}
+
+/**
+ * Update Question Input
+ */
+export interface UpdateQuestionInput {
+	id: string;
+	content: string;
+	explanation: string | null;
+	difficultyId: string;
+	themeId: string;
+	answers: UpdateAnswerInput[];
+	tagIds?: string[];
+}
+
+/**
  * Filter options for finding questions
  */
 export interface FindQuestionsFilter {
@@ -71,6 +93,7 @@ export interface QuestionWithAnswers {
  */
 export interface IQuestionRepository {
 	create(input: CreateQuestionInput): Promise<Question>;
+	update(input: UpdateQuestionInput): Promise<QuestionWithAnswers | null>;
 	findById(id: string): Promise<QuestionWithAnswers | null>;
 	findAll(
 		filter: FindQuestionsFilter,
