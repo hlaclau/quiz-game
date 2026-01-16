@@ -7,6 +7,7 @@ import type {
 	UpdateQuestionUseCase,
 } from "../application/use-cases";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
+import { authMiddleware } from "./middleware";
 
 /**
  * Public Question Routes - for submitting questions
@@ -53,7 +54,7 @@ export const createQuestionRoutes = (
 };
 
 /**
- * Admin Question Routes - for managing questions
+ * Admin Question Routes - for managing questions (protected by auth)
  */
 export const createAdminQuestionRoutes = (
 	getQuestionByIdUseCase: GetQuestionByIdUseCase,
@@ -62,6 +63,7 @@ export const createAdminQuestionRoutes = (
 	updateQuestionUseCase: UpdateQuestionUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/admin/questions" })
+		.use(authMiddleware)
 		.onError(({ code, set }) => {
 			if (code === "VALIDATION") {
 				set.status = 400;
@@ -86,6 +88,7 @@ export const createAdminQuestionRoutes = (
 				});
 			},
 			{
+				auth: true,
 				query: t.Object({
 					page: t.Optional(t.Number({ minimum: 1 })),
 					limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
@@ -109,6 +112,7 @@ export const createAdminQuestionRoutes = (
 				return result;
 			},
 			{
+				auth: true,
 				params: t.Object({
 					id: t.String(),
 				}),
@@ -128,6 +132,7 @@ export const createAdminQuestionRoutes = (
 				return result;
 			},
 			{
+				auth: true,
 				params: t.Object({
 					id: t.String(),
 				}),
@@ -165,6 +170,7 @@ export const createAdminQuestionRoutes = (
 				return result;
 			},
 			{
+				auth: true,
 				params: t.Object({
 					id: t.String(),
 				}),
