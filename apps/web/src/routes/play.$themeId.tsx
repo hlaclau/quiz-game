@@ -26,6 +26,7 @@ function QuizComponent() {
 		queryKey: ["questions", themeId],
 		queryFn: () => api.questions.getRandom(themeId, 10),
 		staleTime: 0, // Always fetch new questions
+		retry: false,
 	});
 
 	const questions = apiResponse?.data;
