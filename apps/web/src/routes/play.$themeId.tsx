@@ -42,13 +42,6 @@ function QuizComponent() {
 
 	const currentQuestion = apiResponse?.data?.[0];
 
-	// Reset timer when new question loads
-	useEffect(() => {
-		if (currentQuestion) {
-			setTimeLeft(QUESTION_TIMER_SECONDS);
-		}
-	}, [currentQuestion?.id]);
-
 	// Timer countdown
 	useEffect(() => {
 		if (isAnswered || !currentQuestion || timeLeft <= 0) return;

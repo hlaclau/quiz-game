@@ -254,6 +254,9 @@ export const api = {
 			const response = await fetch(
 				`${API_URL}/api/question?${searchParams.toString()}`,
 			);
+			if (response.status === 404) {
+				return { data: [] };
+			}
 			if (!response.ok) {
 				throw new Error("Failed to fetch random questions");
 			}
