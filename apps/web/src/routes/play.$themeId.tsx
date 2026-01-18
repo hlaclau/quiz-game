@@ -15,6 +15,7 @@ function QuizComponent() {
 	const { themeId } = Route.useParams();
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
+	const [correctAnswerId, setCorrectAnswerId] = useState<string | null>(null);
 	const [isAnswered, setIsAnswered] = useState(false);
 	const [score, setScore] = useState(0);
 
@@ -62,27 +63,43 @@ function QuizComponent() {
 	const currentQuestion = questions[currentQuestionIndex];
 	const isLastQuestion = currentQuestionIndex === questions.length - 1;
 
-	const handleAnswer = (answerId: string, isCorrect: boolean) => {
+	const handleAnswer = async (answerId: string) => {
 		if (isAnswered) return;
 
 		setSelectedAnswerId(answerId);
 		setIsAnswered(true);
 
-		if (isCorrect) {
-			setScore((prev) => prev + 1);
-		}
-
-		// Auto advance after delay
-		setTimeout(() => {
-			if (isLastQuestion) {
-				// Handle game over (for now just show score)
-				// We'll implement a proper results screen later or just show it here
-			} else {
-				setCurrentQuestionIndex((prev) => prev + 1);
-				setSelectedAnswerId(null);
-				setIsAnswered(false);
+		try {
+			const result = await api.questions.validate(currentQuestion.id, answerId);
+			
+			if (result.isCorrect) {
+				setScore((prev) => prev + 1);
 			}
-		}, 1500);
+			setCorrectAnswerId(result.correctAnswerId);
+
+			// Auto advance after delay
+			setTimeout(() => {
+				if (isLastQuestion) {
+					// Handle game over - don't advance
+				} else {
+					setCurrentQuestionIndex((prev) => prev + 1);
+					setSelectedAnswerId(null);
+					setCorrectAnswerId(null);
+					setIsAnswered(false);
+				}
+			}, 1500);
+		} catch (error) {
+			console.error("Failed to validate answer:", error);
+			// Still advance on error to not block the quiz
+			setTimeout(() => {
+				if (!isLastQuestion) {
+					setCurrentQuestionIndex((prev) => prev + 1);
+					setSelectedAnswerId(null);
+					setCorrectAnswerId(null);
+					setIsAnswered(false);
+				}
+			}, 1500);
+		}
 	};
 
 	if (isAnswered && isLastQuestion && selectedAnswerId) {
@@ -138,15 +155,16 @@ function QuizComponent() {
 					<div className="grid gap-4 md:grid-cols-2">
 						{currentQuestion.answers.map((answer) => {
 							const isSelected = selectedAnswerId === answer.id;
-							const showCorrect = isAnswered && answer.isCorrect;
-							const showWrong = isAnswered && isSelected && !answer.isCorrect;
+							const isCorrectAnswer = correctAnswerId === answer.id;
+							const showCorrect = isAnswered && isCorrectAnswer;
+							const showWrong = isAnswered && isSelected && !isCorrectAnswer;
 
 							return (
 								<button
 									key={answer.id}
 									type="button"
 									disabled={isAnswered}
-									onClick={() => handleAnswer(answer.id, answer.isCorrect)}
+									onClick={() => handleAnswer(answer.id)}
 									className={cn(
 										"relative flex min-h-[80px] w-full items-center justify-center rounded-2xl border-2 p-6 text-center font-medium text-lg transition-all",
 										!isAnswered &&

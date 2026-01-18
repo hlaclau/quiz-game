@@ -4,6 +4,6 @@
 export interface AnswerDTO {
 	id: string;
 	content: string;
-	isCorrect: boolean;
+	isCorrect?: boolean;
 	createdAt: string;
 }

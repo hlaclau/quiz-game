@@ -35,3 +35,8 @@ export {
 	type SetQuestionValidationOutput,
 	SetQuestionValidationUseCase,
 } from "./validate-question";
+export {
+	type ValidateAnswerInput,
+	type ValidateAnswerOutput,
+	ValidateAnswerUseCase,
+} from "./validate-answer/validate-answer.use-case";

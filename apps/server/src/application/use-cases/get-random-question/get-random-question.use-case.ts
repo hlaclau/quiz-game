@@ -17,7 +17,6 @@ function answerToDTO(answer: Answer): AnswerDTO {
 	return {
 		id: answer.id,
 		content: answer.content,
-		isCorrect: answer.isCorrect,
 		createdAt: answer.createdAt.toISOString(),
 	};
 }

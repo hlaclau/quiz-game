@@ -23,6 +23,6 @@ export const routes = new Elysia()
 		),
 	)
 	.use(createDifficultyRoutes(useCases.getDifficulties))
-	.use(createQuestionRoute(useCases.getRandomQuestion))
+	.use(createQuestionRoute(useCases.getRandomQuestion, useCases.validateAnswer))
 	.use(createQuestionRoutes(useCases.createQuestion))
 	.use(createThemeRoutes(useCases.getThemes));

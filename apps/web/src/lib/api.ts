@@ -39,7 +39,7 @@ export interface GetDifficultiesResponse {
 export interface AnswerDTO {
 	id: string;
 	content: string;
-	isCorrect: boolean;
+	isCorrect?: boolean;
 	createdAt: string;
 }
 
@@ -252,6 +252,22 @@ export const api = {
 			);
 			if (!response.ok) {
 				throw new Error("Failed to fetch random questions");
+			}
+			return response.json();
+		},
+		validate: async (
+			questionId: string,
+			answerId: string,
+		): Promise<{ isCorrect: boolean; correctAnswerId: string }> => {
+			const response = await fetch(`${API_URL}/api/question/validate`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ questionId, answerId }),
+			});
+			if (!response.ok) {
+				throw new Error("Failed to validate answer");
 			}
 			return response.json();
 		},

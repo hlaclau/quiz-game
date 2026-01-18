@@ -1,5 +1,8 @@
 import { Elysia, t } from "elysia";
-import type { GetRandomQuestionsUseCase } from "../application/use-cases";
+import type {
+	GetRandomQuestionsUseCase,
+	ValidateAnswerUseCase,
+} from "../application/use-cases";
 
 /**
  * Question Route (singular)
@@ -7,6 +10,7 @@ import type { GetRandomQuestionsUseCase } from "../application/use-cases";
  */
 export const createQuestionRoute = (
 	getRandomQuestionsUseCase: GetRandomQuestionsUseCase,
+	validateAnswerUseCase: ValidateAnswerUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/question" }).get(
 		"/",
@@ -28,6 +32,26 @@ export const createQuestionRoute = (
 			query: t.Object({
 				themeId: t.String(),
 				limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+			}),
+		},
+	).post(
+		"/validate",
+		async ({ body, set }) => {
+			try {
+				const result = await validateAnswerUseCase.execute({
+					questionId: body.questionId,
+					answerId: body.answerId,
+				});
+				return result;
+			} catch (error) {
+				set.status = 404;
+				return { error: (error as Error).message };
+			}
+		},
+		{
+			body: t.Object({
+				questionId: t.String(),
+				answerId: t.String(),
 			}),
 		},
 	);
