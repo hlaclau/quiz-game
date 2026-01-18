@@ -65,16 +65,18 @@ function HomeComponent() {
 
 					<BlurFade delay={0.4} inView>
 						<div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">
-							<ShimmerButton
-								className="h-12 px-8 font-medium text-base"
-								shimmerColor="#a855f7"
-								background="linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
-							>
-								<span className="flex items-center gap-2">
-									Start Playing
-									<ArrowRight className="size-4" />
-								</span>
-							</ShimmerButton>
+							<Link to="/play">
+								<ShimmerButton
+									className="h-12 px-8 font-medium text-base"
+									shimmerColor="#a855f7"
+									background="linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
+								>
+									<span className="flex items-center gap-2">
+										Start Playing
+										<ArrowRight className="size-4" />
+									</span>
+								</ShimmerButton>
+							</Link>
 							<Link
 								to="/login"
 								className="flex h-12 items-center gap-2 rounded-full border border-border bg-background/50 px-8 font-medium text-base text-foreground backdrop-blur-sm transition-all hover:border-violet-500/50 hover:bg-violet-500/10"
@@ -200,16 +202,18 @@ function HomeComponent() {
 								Join thousands of players and start your quiz journey today. No
 								credit card required.
 							</p>
-							<ShimmerButton
-								className="h-14 px-10 font-medium text-lg"
-								shimmerColor="#a855f7"
-								background="linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
-							>
-								<span className="flex items-center gap-2">
-									Get Started Free
-									<ArrowRight className="size-5" />
-								</span>
-							</ShimmerButton>
+							<Link to="/play">
+								<ShimmerButton
+									className="h-14 px-10 font-medium text-lg"
+									shimmerColor="#a855f7"
+									background="linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
+								>
+									<span className="flex items-center gap-2">
+										Get Started Free
+										<ArrowRight className="size-5" />
+									</span>
+								</ShimmerButton>
+							</Link>
 						</div>
 					</div>
 				</BlurFade>

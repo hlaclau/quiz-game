@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { MagicCard } from "@/components/ui/magic-card";
 import type { ThemeDTO } from "@/lib/api";
@@ -17,7 +18,11 @@ export function ThemeCard({ theme }: ThemeCardProps) {
 			gradientTo={`${baseColor}99`}
 			gradientColor={`${baseColor}40`}
 		>
-			<button type="button" className="relative w-full p-6 text-left">
+			<Link
+				to="/play/$themeId"
+				params={{ themeId: theme.id }}
+				className="relative block w-full p-6 text-left"
+			>
 				{/* Glow effect */}
 				{theme.color && (
 					<div
@@ -76,7 +81,7 @@ export function ThemeCard({ theme }: ThemeCardProps) {
 						colorTo={`${baseColor}66`}
 					/>
 				</div>
-			</button>
+			</Link>
 		</MagicCard>
 	);
 }

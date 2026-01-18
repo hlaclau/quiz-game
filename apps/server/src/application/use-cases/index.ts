@@ -18,6 +18,11 @@ export {
 	type GetQuestionsOutput,
 	GetQuestionsUseCase,
 } from "./get-questions";
+export {
+	type GetRandomQuestionsInput,
+	type GetRandomQuestionsOutput,
+	GetRandomQuestionsUseCase,
+} from "./get-random-question";
 export { type GetThemesOutput, GetThemesUseCase } from "./get-themes";
 export {
 	type UpdateAnswerInput,
@@ -25,6 +30,11 @@ export {
 	type UpdateQuestionOutput,
 	UpdateQuestionUseCase,
 } from "./update-question";
+export {
+	type ValidateAnswerInput,
+	type ValidateAnswerOutput,
+	ValidateAnswerUseCase,
+} from "./validate-answer/validate-answer.use-case";
 export {
 	type SetQuestionValidationInput,
 	type SetQuestionValidationOutput,

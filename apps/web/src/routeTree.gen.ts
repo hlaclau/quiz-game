@@ -13,7 +13,9 @@ import { Route as SubmitQuestionRouteImport } from './routes/submit-question'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as QuestionsIdRouteImport } from './routes/questions.$id'
+import { Route as PlayThemeIdRouteImport } from './routes/play.$themeId'
 import { Route as QuestionsIdEditRouteImport } from './routes/questions.$id_.edit'
 
 const SubmitQuestionRoute = SubmitQuestionRouteImport.update({
@@ -36,9 +38,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayIndexRoute = PlayIndexRouteImport.update({
+  id: '/play/',
+  path: '/play/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestionsIdRoute = QuestionsIdRouteImport.update({
   id: '/questions/$id',
   path: '/questions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayThemeIdRoute = PlayThemeIdRouteImport.update({
+  id: '/play/$themeId',
+  path: '/play/$themeId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuestionsIdEditRoute = QuestionsIdEditRouteImport.update({
@@ -52,7 +64,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/submit-question': typeof SubmitQuestionRoute
+  '/play/$themeId': typeof PlayThemeIdRoute
   '/questions/$id': typeof QuestionsIdRoute
+  '/play': typeof PlayIndexRoute
   '/questions/$id/edit': typeof QuestionsIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +74,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/submit-question': typeof SubmitQuestionRoute
+  '/play/$themeId': typeof PlayThemeIdRoute
   '/questions/$id': typeof QuestionsIdRoute
+  '/play': typeof PlayIndexRoute
   '/questions/$id/edit': typeof QuestionsIdEditRoute
 }
 export interface FileRoutesById {
@@ -69,7 +85,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/submit-question': typeof SubmitQuestionRoute
+  '/play/$themeId': typeof PlayThemeIdRoute
   '/questions/$id': typeof QuestionsIdRoute
+  '/play/': typeof PlayIndexRoute
   '/questions/$id_/edit': typeof QuestionsIdEditRoute
 }
 export interface FileRouteTypes {
@@ -79,7 +97,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/submit-question'
+    | '/play/$themeId'
     | '/questions/$id'
+    | '/play'
     | '/questions/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -87,7 +107,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/submit-question'
+    | '/play/$themeId'
     | '/questions/$id'
+    | '/play'
     | '/questions/$id/edit'
   id:
     | '__root__'
@@ -95,7 +117,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/submit-question'
+    | '/play/$themeId'
     | '/questions/$id'
+    | '/play/'
     | '/questions/$id_/edit'
   fileRoutesById: FileRoutesById
 }
@@ -104,7 +128,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   SubmitQuestionRoute: typeof SubmitQuestionRoute
+  PlayThemeIdRoute: typeof PlayThemeIdRoute
   QuestionsIdRoute: typeof QuestionsIdRoute
+  PlayIndexRoute: typeof PlayIndexRoute
   QuestionsIdEditRoute: typeof QuestionsIdEditRoute
 }
 
@@ -138,11 +164,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play/': {
+      id: '/play/'
+      path: '/play'
+      fullPath: '/play'
+      preLoaderRoute: typeof PlayIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/questions/$id': {
       id: '/questions/$id'
       path: '/questions/$id'
       fullPath: '/questions/$id'
       preLoaderRoute: typeof QuestionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/play/$themeId': {
+      id: '/play/$themeId'
+      path: '/play/$themeId'
+      fullPath: '/play/$themeId'
+      preLoaderRoute: typeof PlayThemeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/questions/$id_/edit': {
@@ -160,7 +200,9 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   SubmitQuestionRoute: SubmitQuestionRoute,
+  PlayThemeIdRoute: PlayThemeIdRoute,
   QuestionsIdRoute: QuestionsIdRoute,
+  PlayIndexRoute: PlayIndexRoute,
   QuestionsIdEditRoute: QuestionsIdEditRoute,
 }
 export const routeTree = rootRouteImport

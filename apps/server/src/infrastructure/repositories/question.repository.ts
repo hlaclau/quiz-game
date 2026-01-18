@@ -1,4 +1,13 @@
-import { and, asc, count, type Database, desc, eq } from "@quiz-game/db";
+import {
+	and,
+	asc,
+	count,
+	type Database,
+	desc,
+	eq,
+	inArray,
+	sql,
+} from "@quiz-game/db";
 import {
 	answer as answerTable,
 	question as questionTable,
@@ -304,6 +313,81 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 			validated: row.validated,
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
+		});
+	}
+
+	async findRandomByTheme(
+		themeId: string,
+		limit: number,
+		excludeIds: string[] = [],
+	): Promise<QuestionWithAnswers[]> {
+		// Build conditions
+		const conditions = [
+			eq(questionTable.themeId, themeId),
+			eq(questionTable.validated, true),
+		];
+
+		// Add exclusion condition if there are IDs to exclude
+		if (excludeIds.length > 0) {
+			conditions.push(
+				sql`${questionTable.id} NOT IN (${sql.join(
+					excludeIds.map((id) => sql`${id}`),
+					sql`, `,
+				)})`,
+			);
+		}
+
+		// Get random unique questions by theme
+		const questionRows = await this.db
+			.select()
+			.from(questionTable)
+			.where(and(...conditions))
+			.orderBy(sql`RANDOM()`)
+			.limit(limit);
+
+		if (questionRows.length === 0) return [];
+
+		// Get all answers for the selected questions in one query
+		const questionIds = questionRows.map((q) => q.id);
+		const answerRows = await this.db
+			.select()
+			.from(answerTable)
+			.where(inArray(answerTable.questionId, questionIds));
+
+		// Group answers by questionId
+		const answersByQuestionId = new Map<string, typeof answerRows>();
+		for (const row of answerRows) {
+			const existing = answersByQuestionId.get(row.questionId) ?? [];
+			existing.push(row);
+			answersByQuestionId.set(row.questionId, existing);
+		}
+
+		// Map to domain entities
+		return questionRows.map((questionRow) => {
+			const question = Question.create({
+				id: questionRow.id,
+				content: questionRow.content,
+				explanation: questionRow.explanation,
+				difficultyId: questionRow.difficultyId,
+				themeId: questionRow.themeId,
+				authorId: questionRow.authorId,
+				validated: questionRow.validated,
+				createdAt: questionRow.createdAt,
+				updatedAt: questionRow.updatedAt,
+			});
+
+			const questionAnswers = answersByQuestionId.get(questionRow.id) ?? [];
+			const answers = questionAnswers.map((row) =>
+				Answer.create({
+					id: row.id,
+					content: row.content,
+					isCorrect: row.isCorrect,
+					questionId: row.questionId,
+					createdAt: row.createdAt,
+				}),
+			);
+
+			return { question, answers };
 		});
 	}
 }

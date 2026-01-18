@@ -39,7 +39,7 @@ export interface GetDifficultiesResponse {
 export interface AnswerDTO {
 	id: string;
 	content: string;
-	isCorrect: boolean;
+	isCorrect?: boolean;
 	createdAt: string;
 }
 
@@ -87,6 +87,10 @@ export interface GetQuestionsResponse {
 
 export interface GetQuestionByIdResponse {
 	data: QuestionWithAnswersDTO | null;
+}
+
+export interface GetRandomQuestionsResponse {
+	data: QuestionWithAnswersDTO[];
 }
 
 /**
@@ -234,6 +238,45 @@ export const api = {
 			}
 			const result = await response.json();
 			return result.data;
+		},
+		getRandom: async (
+			themeId: string,
+			limit = 1,
+			excludeIds: string[] = [],
+		): Promise<GetRandomQuestionsResponse> => {
+			const searchParams = new URLSearchParams();
+			searchParams.set("themeId", themeId);
+			searchParams.set("limit", limit.toString());
+			if (excludeIds.length > 0) {
+				searchParams.set("excludeIds", excludeIds.join(","));
+			}
+
+			const response = await fetch(
+				`${API_URL}/api/question?${searchParams.toString()}`,
+			);
+			if (response.status === 404) {
+				return { data: [] };
+			}
+			if (!response.ok) {
+				throw new Error("Failed to fetch random questions");
+			}
+			return response.json();
+		},
+		validate: async (
+			questionId: string,
+			answerId: string,
+		): Promise<{ isCorrect: boolean; correctAnswerId: string }> => {
+			const response = await fetch(`${API_URL}/api/question/validate`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ questionId, answerId }),
+			});
+			if (!response.ok) {
+				throw new Error("Failed to validate answer");
+			}
+			return response.json();
 		},
 	},
 };

@@ -4,6 +4,7 @@ import {
 	GetDifficultiesUseCase,
 	GetQuestionByIdUseCase,
 	GetQuestionsUseCase,
+	GetRandomQuestionsUseCase,
 	GetThemesUseCase,
 	SetQuestionValidationUseCase,
 	UpdateQuestionUseCase,
@@ -29,6 +30,7 @@ export const useCases = {
 	updateQuestion: new UpdateQuestionUseCase(repositories.question),
 	getQuestionById: new GetQuestionByIdUseCase(repositories.question),
 	getQuestions: new GetQuestionsUseCase(repositories.question),
+	getRandomQuestions: new GetRandomQuestionsUseCase(repositories.question),
 	getThemes: new GetThemesUseCase(repositories.theme),
 	getDifficulties: new GetDifficultiesUseCase(repositories.difficulty),
 	setQuestionValidation: new SetQuestionValidationUseCase(

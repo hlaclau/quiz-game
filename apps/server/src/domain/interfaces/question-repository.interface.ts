@@ -104,4 +104,9 @@ export interface IQuestionRepository {
 		id: string,
 		validated: boolean,
 	): Promise<Question | null>;
+	findRandomByTheme(
+		themeId: string,
+		limit: number,
+		excludeIds?: string[],
+	): Promise<QuestionWithAnswers[]>;
 }
