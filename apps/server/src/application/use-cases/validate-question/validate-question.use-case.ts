@@ -2,9 +2,9 @@ import type { Question } from "../../../domain/entities/question";
 import type { IQuestionRepository } from "../../../domain/interfaces/question-repository.interface";
 import type { QuestionDTO } from "../../dtos/question.dto";
 import type {
-	GetQuestionsInput,
-	GetQuestionsOutput,
-} from "./get-questions.types";
+	SetQuestionValidationInput,
+	SetQuestionValidationOutput,
+} from "./validate-question.types";
 
 /**
  * Maps a Question entity to a QuestionDTO
@@ -24,30 +24,22 @@ function toDTO(question: Question): QuestionDTO {
 }
 
 /**
- * GetQuestions Use Case
- * Retrieves paginated questions with optional filters and sorting
+ * SetQuestionValidation Use Case
+ * Sets the validation status of a question
  */
-export class GetQuestionsUseCase {
+export class SetQuestionValidationUseCase {
 	constructor(private readonly questionRepository: IQuestionRepository) {}
 
-	async execute(input: GetQuestionsInput): Promise<GetQuestionsOutput> {
-		const { page, limit, themeId, validated, sortBy, sortOrder } = input;
-
-		const result = await this.questionRepository.findAll(
-			{ themeId, validated },
-			{ page, limit },
-			{ sortBy, sortOrder },
+	async execute(
+		input: SetQuestionValidationInput,
+	): Promise<SetQuestionValidationOutput> {
+		const question = await this.questionRepository.setQuestionValidation(
+			input.id,
+			input.validated,
 		);
 
-		const data = result.data.map(toDTO);
-		const totalPages = Math.ceil(result.total / limit);
-
 		return {
-			data,
-			total: result.total,
-			page,
-			limit,
-			totalPages,
+			data: question ? toDTO(question) : null,
 		};
 	}
 }

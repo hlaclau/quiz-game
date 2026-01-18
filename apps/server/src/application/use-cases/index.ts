@@ -24,3 +24,14 @@ export {
 	GetRandomQuestionsUseCase,
 } from "./get-random-question";
 export { type GetThemesOutput, GetThemesUseCase } from "./get-themes";
+export {
+	type UpdateAnswerInput,
+	type UpdateQuestionInput,
+	type UpdateQuestionOutput,
+	UpdateQuestionUseCase,
+} from "./update-question";
+export {
+	type SetQuestionValidationInput,
+	type SetQuestionValidationOutput,
+	SetQuestionValidationUseCase,
+} from "./validate-question";

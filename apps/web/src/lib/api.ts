@@ -65,10 +65,16 @@ export interface QuestionWithAnswersDTO extends QuestionDTO {
 	answers: AnswerDTO[];
 }
 
+export type SortField = "createdAt" | "updatedAt";
+export type SortOrder = "asc" | "desc";
+
 export interface GetQuestionsParams {
 	page?: number;
 	limit?: number;
 	themeId?: string;
+	validated?: boolean;
+	sortBy?: SortField;
+	sortOrder?: SortOrder;
 }
 
 export interface GetQuestionsResponse {
@@ -105,6 +111,27 @@ export interface CreateQuestionInput {
 }
 
 /**
+ * Answer input for updating a question
+ */
+export interface UpdateAnswerInput {
+	id?: string;
+	content: string;
+	isCorrect: boolean;
+}
+
+/**
+ * Update question request body
+ */
+export interface UpdateQuestionInput {
+	content: string;
+	explanation: string | null;
+	difficultyId: string;
+	themeId: string;
+	answers: UpdateAnswerInput[];
+	tagIds?: string[];
+}
+
+/**
  * API client for themes
  */
 export const api = {
@@ -134,8 +161,12 @@ export const api = {
 			if (params.page) searchParams.set("page", params.page.toString());
 			if (params.limit) searchParams.set("limit", params.limit.toString());
 			if (params.themeId) searchParams.set("themeId", params.themeId);
+			if (params.validated !== undefined)
+				searchParams.set("validated", params.validated.toString());
+			if (params.sortBy) searchParams.set("sortBy", params.sortBy);
+			if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
 
-			const url = `${API_URL}/api/questions${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+			const url = `${API_URL}/api/admin/questions${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 			const response = await fetch(url);
 			if (!response.ok) {
 				throw new Error("Failed to fetch questions");
@@ -143,7 +174,7 @@ export const api = {
 			return response.json();
 		},
 		getById: async (id: string): Promise<GetQuestionByIdResponse> => {
-			const response = await fetch(`${API_URL}/api/questions/${id}`);
+			const response = await fetch(`${API_URL}/api/admin/questions/${id}`);
 			if (!response.ok) {
 				if (response.status === 404) {
 					return { data: null };
@@ -164,6 +195,45 @@ export const api = {
 				const error = await response.json().catch(() => ({}));
 				throw new Error(error.error || "Failed to create question");
 			}
+		},
+		update: async (
+			id: string,
+			input: UpdateQuestionInput,
+		): Promise<QuestionWithAnswersDTO> => {
+			const response = await fetch(`${API_URL}/api/admin/questions/${id}`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(input),
+			});
+			if (!response.ok) {
+				const error = await response.json().catch(() => ({}));
+				throw new Error(error.error || "Failed to update question");
+			}
+			const result = await response.json();
+			return result.data;
+		},
+		setValidation: async (
+			id: string,
+			validated: boolean,
+		): Promise<QuestionDTO> => {
+			const response = await fetch(
+				`${API_URL}/api/admin/questions/${id}/validation`,
+				{
+					method: "PATCH",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ validated }),
+				},
+			);
+			if (!response.ok) {
+				const error = await response.json().catch(() => ({}));
+				throw new Error(error.error || "Failed to update question validation");
+			}
+			const result = await response.json();
+			return result.data;
 		},
 	},
 };

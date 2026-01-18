@@ -38,6 +38,7 @@ describe("GetQuestionsUseCase", () => {
 			create: mock(() => Promise.resolve(mockQuestion1)),
 			findById: mock(() => Promise.resolve(null)),
 			findAll: mock(() => Promise.resolve({ data: mockQuestions, total: 2 })),
+			setQuestionValidation: mock(() => Promise.resolve(mockQuestion1)),
 		};
 		useCase = new GetQuestionsUseCase(mockRepository);
 	});
@@ -111,8 +112,9 @@ describe("GetQuestionsUseCase", () => {
 			await useCase.execute({ page: 1, limit: 10, themeId: "theme-1" });
 
 			expect(mockRepository.findAll).toHaveBeenCalledWith(
-				{ themeId: "theme-1" },
+				{ themeId: "theme-1", validated: undefined },
 				{ page: 1, limit: 10 },
+				{ sortBy: undefined, sortOrder: undefined },
 			);
 		});
 
@@ -120,8 +122,9 @@ describe("GetQuestionsUseCase", () => {
 			await useCase.execute({ page: 1, limit: 10 });
 
 			expect(mockRepository.findAll).toHaveBeenCalledWith(
-				{ themeId: undefined },
+				{ themeId: undefined, validated: undefined },
 				{ page: 1, limit: 10 },
+				{ sortBy: undefined, sortOrder: undefined },
 			);
 		});
 
@@ -129,8 +132,61 @@ describe("GetQuestionsUseCase", () => {
 			await useCase.execute({ page: 3, limit: 20 });
 
 			expect(mockRepository.findAll).toHaveBeenCalledWith(
-				{ themeId: undefined },
+				{ themeId: undefined, validated: undefined },
 				{ page: 3, limit: 20 },
+				{ sortBy: undefined, sortOrder: undefined },
+			);
+		});
+
+		it("should pass validated filter to repository", async () => {
+			await useCase.execute({ page: 1, limit: 10, validated: true });
+
+			expect(mockRepository.findAll).toHaveBeenCalledWith(
+				{ themeId: undefined, validated: true },
+				{ page: 1, limit: 10 },
+				{ sortBy: undefined, sortOrder: undefined },
+			);
+		});
+
+		it("should pass validated=false filter to repository", async () => {
+			await useCase.execute({ page: 1, limit: 10, validated: false });
+
+			expect(mockRepository.findAll).toHaveBeenCalledWith(
+				{ themeId: undefined, validated: false },
+				{ page: 1, limit: 10 },
+				{ sortBy: undefined, sortOrder: undefined },
+			);
+		});
+
+		it("should pass sort options to repository", async () => {
+			await useCase.execute({
+				page: 1,
+				limit: 10,
+				sortBy: "createdAt",
+				sortOrder: "desc",
+			});
+
+			expect(mockRepository.findAll).toHaveBeenCalledWith(
+				{ themeId: undefined, validated: undefined },
+				{ page: 1, limit: 10 },
+				{ sortBy: "createdAt", sortOrder: "desc" },
+			);
+		});
+
+		it("should pass all filters and sort options together", async () => {
+			await useCase.execute({
+				page: 2,
+				limit: 15,
+				themeId: "theme-1",
+				validated: true,
+				sortBy: "updatedAt",
+				sortOrder: "asc",
+			});
+
+			expect(mockRepository.findAll).toHaveBeenCalledWith(
+				{ themeId: "theme-1", validated: true },
+				{ page: 2, limit: 15 },
+				{ sortBy: "updatedAt", sortOrder: "asc" },
 			);
 		});
 

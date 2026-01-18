@@ -1,5 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { ArrowUpDown } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +12,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
 	Table,
 	TableBody,
@@ -21,6 +24,8 @@ import {
 import { getUser } from "@/functions/get-user";
 import { useQuestions } from "@/hooks/use-questions";
 import { useThemes } from "@/hooks/use-themes";
+import { useSetQuestionValidation } from "@/hooks/use-validate-question";
+import type { SortField, SortOrder } from "@/lib/api";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
@@ -37,6 +42,8 @@ export const Route = createFileRoute("/dashboard")({
 
 const ITEMS_PER_PAGE = 10;
 
+type ValidationFilter = "all" | "pending" | "validated";
+
 function SkeletonRow() {
 	return (
 		<TableRow>
@@ -47,10 +54,10 @@ function SkeletonRow() {
 				<Skeleton className="h-4 w-20" />
 			</TableCell>
 			<TableCell>
-				<Skeleton className="h-4 w-16" />
+				<Skeleton className="h-4 w-24" />
 			</TableCell>
 			<TableCell>
-				<Skeleton className="h-4 w-24" />
+				<Skeleton className="h-5 w-9" />
 			</TableCell>
 		</TableRow>
 	);
@@ -61,14 +68,24 @@ function RouteComponent() {
 	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
 	const [themeFilter, setThemeFilter] = useState<string | undefined>(undefined);
+	const [validationFilter, setValidationFilter] =
+		useState<ValidationFilter>("all");
+	const sortBy: SortField = "createdAt";
+	const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
+	const validatedFilterValue =
+		validationFilter === "all" ? undefined : validationFilter === "validated";
 	const { data: questionsData, isLoading: isLoadingQuestions } = useQuestions({
 		page,
 		limit: ITEMS_PER_PAGE,
 		themeId: themeFilter,
+		validated: validatedFilterValue,
+		sortBy,
+		sortOrder,
 	});
 
 	const { data: themesData } = useThemes();
+	const validationMutation = useSetQuestionValidation();
 
 	const themeMap = new Map(
 		themesData?.data.map((theme) => [theme.id, theme]) ?? [],
@@ -89,6 +106,27 @@ function RouteComponent() {
 		setPage(1);
 	};
 
+	const handleValidationFilterChange = (value: ValidationFilter) => {
+		setValidationFilter(value);
+		setPage(1);
+	};
+
+	const handleSortToggle = () => {
+		setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
+	};
+
+	const handleSetValidation = async (
+		questionId: string,
+		validated: boolean,
+	) => {
+		try {
+			await validationMutation.mutateAsync({ id: questionId, validated });
+			toast.success(validated ? "Question validated" : "Question unvalidated");
+		} catch {
+			toast.error("Failed to update question validation");
+		}
+	};
+
 	return (
 		<div className="container mx-auto px-4 py-8">
 			<div className="mb-8">
@@ -99,14 +137,45 @@ function RouteComponent() {
 			</div>
 
 			<div className="space-y-4">
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<h2 className="font-semibold text-xl">Questions</h2>
-					<div className="flex items-center gap-4">
+					<div className="flex flex-wrap items-center gap-2">
+						{/* Validation Filter Tabs */}
+						<div className="flex rounded-lg border bg-muted p-1">
+							<Button
+								variant={validationFilter === "all" ? "secondary" : "ghost"}
+								size="sm"
+								className="h-7 px-3"
+								onClick={() => handleValidationFilterChange("all")}
+							>
+								All
+							</Button>
+							<Button
+								variant={validationFilter === "pending" ? "secondary" : "ghost"}
+								size="sm"
+								className="h-7 px-3"
+								onClick={() => handleValidationFilterChange("pending")}
+							>
+								Pending
+							</Button>
+							<Button
+								variant={
+									validationFilter === "validated" ? "secondary" : "ghost"
+								}
+								size="sm"
+								className="h-7 px-3"
+								onClick={() => handleValidationFilterChange("validated")}
+							>
+								Validated
+							</Button>
+						</div>
+
+						{/* Theme Filter */}
 						<Select
 							value={themeFilter ?? "all"}
 							onValueChange={handleThemeChange}
 						>
-							<SelectTrigger className="w-[200px]">
+							<SelectTrigger className="w-[160px]">
 								<SelectValue placeholder="Filter by theme" />
 							</SelectTrigger>
 							<SelectContent>
@@ -127,8 +196,19 @@ function RouteComponent() {
 							<TableRow>
 								<TableHead className="w-[400px]">Question</TableHead>
 								<TableHead>Theme</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead>Created</TableHead>
+								<TableHead>
+									<Button
+										variant="ghost"
+										size="sm"
+										className="-ml-3 h-8 font-medium"
+										onClick={handleSortToggle}
+										aria-label="Toggle sort order by creation date"
+									>
+										Created
+										<ArrowUpDown className="ml-1 h-4 w-4" aria-hidden="true" />
+									</Button>
+								</TableHead>
+								<TableHead className="w-[100px]">Validated</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -153,17 +233,16 @@ function RouteComponent() {
 								questionsData?.data.map((question) => {
 									const theme = themeMap.get(question.themeId);
 									return (
-										<TableRow
-											key={question.id}
-											className="cursor-pointer hover:bg-muted/50"
-											onClick={() =>
-												navigate({
-													to: "/questions/$id",
-													params: { id: question.id },
-												})
-											}
-										>
-											<TableCell className="font-medium">
+										<TableRow key={question.id} className="group">
+											<TableCell
+												className="cursor-pointer font-medium"
+												onClick={() =>
+													navigate({
+														to: "/questions/$id",
+														params: { id: question.id },
+													})
+												}
+											>
 												{question.content.length > 80
 													? `${question.content.substring(0, 80)}...`
 													: question.content}
@@ -183,15 +262,18 @@ function RouteComponent() {
 													<span className="text-muted-foreground">-</span>
 												)}
 											</TableCell>
-											<TableCell>
-												<Badge
-													variant={question.validated ? "default" : "outline"}
-												>
-													{question.validated ? "Validated" : "Pending"}
-												</Badge>
-											</TableCell>
 											<TableCell className="text-muted-foreground">
 												{new Date(question.createdAt).toLocaleDateString()}
+											</TableCell>
+											<TableCell>
+												<Switch
+													checked={question.validated}
+													disabled={validationMutation.isPending}
+													onCheckedChange={(checked) =>
+														handleSetValidation(question.id, checked)
+													}
+													aria-label="Toggle validation status for question"
+												/>
 											</TableCell>
 										</TableRow>
 									);

@@ -3,16 +3,17 @@ import type {
 	CreateQuestionUseCase,
 	GetQuestionByIdUseCase,
 	GetQuestionsUseCase,
+	SetQuestionValidationUseCase,
+	UpdateQuestionUseCase,
 } from "../application/use-cases";
 import { REQUIRED_ANSWERS_COUNT } from "../domain/entities/question";
+import { authMiddleware } from "./middleware";
 
 /**
- * Question Routes
+ * Public Question Routes - for submitting questions
  */
 export const createQuestionRoutes = (
 	createQuestionUseCase: CreateQuestionUseCase,
-	getQuestionByIdUseCase: GetQuestionByIdUseCase,
-	getQuestionsUseCase: GetQuestionsUseCase,
 ) => {
 	return new Elysia({ prefix: "/api/questions" })
 		.onError(({ code, set }) => {
@@ -23,39 +24,6 @@ export const createQuestionRoutes = (
 				};
 			}
 		})
-		.get(
-			"/",
-			async ({ query }) => {
-				const page = query.page ?? 1;
-				const limit = query.limit ?? 10;
-				const themeId = query.themeId;
-
-				return getQuestionsUseCase.execute({ page, limit, themeId });
-			},
-			{
-				query: t.Object({
-					page: t.Optional(t.Number({ minimum: 1 })),
-					limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
-					themeId: t.Optional(t.String()),
-				}),
-			},
-		)
-		.get(
-			"/:id",
-			async ({ params, set }) => {
-				const result = await getQuestionByIdUseCase.execute({ id: params.id });
-				if (!result.data) {
-					set.status = 404;
-					return { error: "Question not found" };
-				}
-				return result;
-			},
-			{
-				params: t.Object({
-					id: t.String(),
-				}),
-			},
-		)
 		.post(
 			"/",
 			async ({ body, set }) => {
@@ -80,6 +48,134 @@ export const createQuestionRoutes = (
 						},
 					),
 					tagIds: t.Optional(t.Array(t.String())),
+				}),
+			},
+		);
+};
+
+/**
+ * Admin Question Routes - for managing questions (protected by auth)
+ */
+export const createAdminQuestionRoutes = (
+	getQuestionByIdUseCase: GetQuestionByIdUseCase,
+	getQuestionsUseCase: GetQuestionsUseCase,
+	setQuestionValidationUseCase: SetQuestionValidationUseCase,
+	updateQuestionUseCase: UpdateQuestionUseCase,
+) => {
+	return new Elysia({ prefix: "/api/admin/questions" })
+		.use(authMiddleware)
+		.onError(({ code, set }) => {
+			if (code === "VALIDATION") {
+				set.status = 400;
+				return {
+					error: `A question must have exactly ${REQUIRED_ANSWERS_COUNT} answers`,
+				};
+			}
+		})
+		.get(
+			"/",
+			async ({ query }) => {
+				const page = query.page ?? 1;
+				const limit = query.limit ?? 10;
+
+				return getQuestionsUseCase.execute({
+					page,
+					limit,
+					themeId: query.themeId,
+					validated: query.validated,
+					sortBy: query.sortBy,
+					sortOrder: query.sortOrder,
+				});
+			},
+			{
+				auth: true,
+				query: t.Object({
+					page: t.Optional(t.Number({ minimum: 1 })),
+					limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+					themeId: t.Optional(t.String()),
+					validated: t.Optional(t.Boolean()),
+					sortBy: t.Optional(
+						t.Union([t.Literal("createdAt"), t.Literal("updatedAt")]),
+					),
+					sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+				}),
+			},
+		)
+		.get(
+			"/:id",
+			async ({ params, set }) => {
+				const result = await getQuestionByIdUseCase.execute({ id: params.id });
+				if (!result.data) {
+					set.status = 404;
+					return { error: "Question not found" };
+				}
+				return result;
+			},
+			{
+				auth: true,
+				params: t.Object({
+					id: t.String(),
+				}),
+			},
+		)
+		.patch(
+			"/:id",
+			async ({ params, body, set }) => {
+				const result = await updateQuestionUseCase.execute({
+					id: params.id,
+					...body,
+				});
+				if (!result.data) {
+					set.status = 404;
+					return { error: "Question not found" };
+				}
+				return result;
+			},
+			{
+				auth: true,
+				params: t.Object({
+					id: t.String(),
+				}),
+				body: t.Object({
+					content: t.String({ minLength: 1 }),
+					explanation: t.Optional(t.Union([t.String(), t.Null()])),
+					difficultyId: t.String({ minLength: 1 }),
+					themeId: t.String({ minLength: 1 }),
+					answers: t.Array(
+						t.Object({
+							id: t.Optional(t.String()),
+							content: t.String({ minLength: 1 }),
+							isCorrect: t.Boolean(),
+						}),
+						{
+							minItems: REQUIRED_ANSWERS_COUNT,
+							maxItems: REQUIRED_ANSWERS_COUNT,
+						},
+					),
+					tagIds: t.Optional(t.Array(t.String())),
+				}),
+			},
+		)
+		.patch(
+			"/:id/validation",
+			async ({ params, body, set }) => {
+				const result = await setQuestionValidationUseCase.execute({
+					id: params.id,
+					validated: body.validated,
+				});
+				if (!result.data) {
+					set.status = 404;
+					return { error: "Question not found" };
+				}
+				return result;
+			},
+			{
+				auth: true,
+				params: t.Object({
+					id: t.String(),
+				}),
+				body: t.Object({
+					validated: t.Boolean(),
 				}),
 			},
 		);

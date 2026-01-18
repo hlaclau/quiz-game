@@ -23,10 +23,44 @@ export interface CreateQuestionInput {
 }
 
 /**
+ * Answer Input for updating a question
+ */
+export interface UpdateAnswerInput {
+	id?: string;
+	content: string;
+	isCorrect: boolean;
+}
+
+/**
+ * Update Question Input
+ */
+export interface UpdateQuestionInput {
+	id: string;
+	content: string;
+	explanation: string | null;
+	difficultyId: string;
+	themeId: string;
+	answers: UpdateAnswerInput[];
+	tagIds?: string[];
+}
+
+/**
  * Filter options for finding questions
  */
 export interface FindQuestionsFilter {
 	themeId?: string;
+	validated?: boolean;
+}
+
+/**
+ * Sort options for finding questions
+ */
+export type SortField = "createdAt" | "updatedAt";
+export type SortOrder = "asc" | "desc";
+
+export interface SortOptions {
+	sortBy?: SortField;
+	sortOrder?: SortOrder;
 }
 
 /**
@@ -59,11 +93,17 @@ export interface QuestionWithAnswers {
  */
 export interface IQuestionRepository {
 	create(input: CreateQuestionInput): Promise<Question>;
+	update(input: UpdateQuestionInput): Promise<QuestionWithAnswers | null>;
 	findById(id: string): Promise<QuestionWithAnswers | null>;
 	findAll(
 		filter: FindQuestionsFilter,
 		pagination: PaginationOptions,
+		sort?: SortOptions,
 	): Promise<PaginatedResult<Question>>;
+	setQuestionValidation(
+		id: string,
+		validated: boolean,
+	): Promise<Question | null>;
 	findRandomByTheme(
 		themeId: string,
 		limit: number,
