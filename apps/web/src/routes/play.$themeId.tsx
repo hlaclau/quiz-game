@@ -71,7 +71,7 @@ function QuizComponent() {
 
 		try {
 			const result = await api.questions.validate(currentQuestion.id, answerId);
-			
+
 			if (result.isCorrect) {
 				setScore((prev) => prev + 1);
 			}

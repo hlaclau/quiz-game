@@ -31,12 +31,12 @@ export {
 	UpdateQuestionUseCase,
 } from "./update-question";
 export {
-	type SetQuestionValidationInput,
-	type SetQuestionValidationOutput,
-	SetQuestionValidationUseCase,
-} from "./validate-question";
-export {
 	type ValidateAnswerInput,
 	type ValidateAnswerOutput,
 	ValidateAnswerUseCase,
 } from "./validate-answer/validate-answer.use-case";
+export {
+	type SetQuestionValidationInput,
+	type SetQuestionValidationOutput,
+	SetQuestionValidationUseCase,
+} from "./validate-question";

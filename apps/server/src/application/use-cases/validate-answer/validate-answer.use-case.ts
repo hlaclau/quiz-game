@@ -20,7 +20,9 @@ export class ValidateAnswerUseCase {
 			throw new Error("Question not found");
 		}
 
-		const selectedAnswer = question.answers.find((a) => a.id === input.answerId);
+		const selectedAnswer = question.answers.find(
+			(a) => a.id === input.answerId,
+		);
 		if (!selectedAnswer) {
 			throw new Error("Answer not found");
 		}
