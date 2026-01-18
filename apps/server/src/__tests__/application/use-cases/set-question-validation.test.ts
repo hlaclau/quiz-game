@@ -23,11 +23,13 @@ describe("SetQuestionValidationUseCase", () => {
 	beforeEach(() => {
 		mockRepository = {
 			create: mock(() => Promise.resolve(createMockQuestion(false))),
+			update: mock(() => Promise.resolve(null)),
 			findById: mock(() => Promise.resolve(null)),
 			findAll: mock(() => Promise.resolve({ data: [], total: 0 })),
 			setQuestionValidation: mock(() =>
 				Promise.resolve(createMockQuestion(true)),
 			),
+			findRandomByTheme: mock(() => Promise.resolve([])),
 		};
 		useCase = new SetQuestionValidationUseCase(mockRepository);
 	});

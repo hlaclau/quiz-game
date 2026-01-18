@@ -107,5 +107,6 @@ export interface IQuestionRepository {
 	findRandomByTheme(
 		themeId: string,
 		limit: number,
+		excludeIds?: string[],
 	): Promise<QuestionWithAnswers[]>;
 }

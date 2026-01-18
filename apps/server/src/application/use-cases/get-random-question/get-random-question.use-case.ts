@@ -53,6 +53,7 @@ export class GetRandomQuestionsUseCase {
 		const results = await this.questionRepository.findRandomByTheme(
 			input.themeId,
 			input.limit,
+			input.excludeIds,
 		);
 
 		return {

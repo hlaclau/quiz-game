@@ -7,6 +7,7 @@ import type { QuestionDTO } from "../../dtos/question.dto";
 export interface GetRandomQuestionsInput {
 	themeId: string;
 	limit: number;
+	excludeIds?: string[];
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -11,26 +11,88 @@ export const Route = createFileRoute("/play/$themeId")({
 	component: QuizComponent,
 });
 
+const TOTAL_QUESTIONS = 10;
+
 function QuizComponent() {
 	const { themeId } = Route.useParams();
-	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+	const [answeredQuestionIds, setAnsweredQuestionIds] = useState<string[]>([]);
 	const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
 	const [correctAnswerId, setCorrectAnswerId] = useState<string | null>(null);
 	const [isAnswered, setIsAnswered] = useState(false);
 	const [score, setScore] = useState(0);
+	const [isQuizComplete, setIsQuizComplete] = useState(false);
+	const [noMoreQuestions, setNoMoreQuestions] = useState(false);
+
+	const currentQuestionNumber = answeredQuestionIds.length + 1;
 
 	const {
 		data: apiResponse,
 		isLoading,
 		error,
 	} = useQuery({
-		queryKey: ["questions", themeId],
-		queryFn: () => api.questions.getRandom(themeId, 10),
-		staleTime: 0, // Always fetch new questions
+		queryKey: ["quiz", themeId, answeredQuestionIds.length],
+		queryFn: () => api.questions.getRandom(themeId, 1, answeredQuestionIds),
+		enabled: !isQuizComplete && answeredQuestionIds.length < TOTAL_QUESTIONS,
+		staleTime: Number.POSITIVE_INFINITY,
+		refetchOnWindowFocus: false,
 		retry: false,
 	});
 
-	const questions = apiResponse?.data;
+	const currentQuestion = apiResponse?.data?.[0];
+
+	// Check if we ran out of questions from the API
+	useEffect(() => {
+		if (apiResponse?.data && apiResponse.data.length === 0) {
+			setNoMoreQuestions(true);
+			setIsQuizComplete(true);
+		}
+	}, [apiResponse]);
+
+	const handleAnswer = async (answerId: string) => {
+		if (isAnswered || !currentQuestion) return;
+
+		setSelectedAnswerId(answerId);
+		setIsAnswered(true);
+
+		try {
+			const result = await api.questions.validate(currentQuestion.id, answerId);
+
+			if (result.isCorrect) {
+				setScore((prev) => prev + 1);
+			}
+			setCorrectAnswerId(result.correctAnswerId);
+
+			// Auto advance after delay
+			setTimeout(() => {
+				const newAnsweredIds = [...answeredQuestionIds, currentQuestion.id];
+				setAnsweredQuestionIds(newAnsweredIds);
+
+				if (newAnsweredIds.length >= TOTAL_QUESTIONS) {
+					setIsQuizComplete(true);
+				} else {
+					// Reset state for next question
+					setSelectedAnswerId(null);
+					setCorrectAnswerId(null);
+					setIsAnswered(false);
+				}
+			}, 1500);
+		} catch (error) {
+			console.error("Failed to validate answer:", error);
+			// Still advance on error to not block the quiz
+			setTimeout(() => {
+				const newAnsweredIds = [...answeredQuestionIds, currentQuestion.id];
+				setAnsweredQuestionIds(newAnsweredIds);
+
+				if (newAnsweredIds.length >= TOTAL_QUESTIONS) {
+					setIsQuizComplete(true);
+				} else {
+					setSelectedAnswerId(null);
+					setCorrectAnswerId(null);
+					setIsAnswered(false);
+				}
+			}, 1500);
+		}
+	};
 
 	if (isLoading) {
 		return (
@@ -43,7 +105,7 @@ function QuizComponent() {
 		);
 	}
 
-	if (error || !questions || questions.length === 0) {
+	if (error) {
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
 				<div className="rounded-full bg-destructive/10 p-4 text-destructive">
@@ -60,50 +122,8 @@ function QuizComponent() {
 		);
 	}
 
-	const currentQuestion = questions[currentQuestionIndex];
-	const isLastQuestion = currentQuestionIndex === questions.length - 1;
-
-	const handleAnswer = async (answerId: string) => {
-		if (isAnswered) return;
-
-		setSelectedAnswerId(answerId);
-		setIsAnswered(true);
-
-		try {
-			const result = await api.questions.validate(currentQuestion.id, answerId);
-
-			if (result.isCorrect) {
-				setScore((prev) => prev + 1);
-			}
-			setCorrectAnswerId(result.correctAnswerId);
-
-			// Auto advance after delay
-			setTimeout(() => {
-				if (isLastQuestion) {
-					// Handle game over - don't advance
-				} else {
-					setCurrentQuestionIndex((prev) => prev + 1);
-					setSelectedAnswerId(null);
-					setCorrectAnswerId(null);
-					setIsAnswered(false);
-				}
-			}, 1500);
-		} catch (error) {
-			console.error("Failed to validate answer:", error);
-			// Still advance on error to not block the quiz
-			setTimeout(() => {
-				if (!isLastQuestion) {
-					setCurrentQuestionIndex((prev) => prev + 1);
-					setSelectedAnswerId(null);
-					setCorrectAnswerId(null);
-					setIsAnswered(false);
-				}
-			}, 1500);
-		}
-	};
-
-	if (isAnswered && isLastQuestion && selectedAnswerId) {
-		// Simple results view for now
+	if (isQuizComplete) {
+		const totalAnswered = answeredQuestionIds.length;
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center gap-6 p-6 text-center">
 				<BlurFade inView>
@@ -112,8 +132,13 @@ function QuizComponent() {
 					</div>
 					<h1 className="mt-6 font-bold text-4xl">Quiz Completed!</h1>
 					<p className="mt-2 text-muted-foreground text-xl">
-						You scored {score} out of {questions.length}
+						You scored {score} out of {totalAnswered}
 					</p>
+					{noMoreQuestions && totalAnswered < TOTAL_QUESTIONS && (
+						<p className="mt-1 text-muted-foreground text-sm">
+							(No more questions available in this theme)
+						</p>
+					)}
 					<div className="mt-8 flex gap-4">
 						<Button asChild>
 							<Link to="/play">Play Again</Link>
@@ -127,6 +152,12 @@ function QuizComponent() {
 		);
 	}
 
+	if (!currentQuestion) {
+		// This state might happen briefly before the effect sets isQuizComplete
+		// or if the API returns empty list initially
+		return null;
+	}
+
 	return (
 		<div className="relative min-h-screen px-6 py-12">
 			{/* Header */}
@@ -137,7 +168,7 @@ function QuizComponent() {
 					</Link>
 				</Button>
 				<div className="font-medium text-muted-foreground text-sm">
-					Question {currentQuestionIndex + 1} / {questions.length}
+					Question {currentQuestionNumber} / {TOTAL_QUESTIONS}
 				</div>
 				<div className="font-medium text-primary text-sm">Score: {score}</div>
 			</div>

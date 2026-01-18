@@ -241,11 +241,15 @@ export const api = {
 		},
 		getRandom: async (
 			themeId: string,
-			limit = 10,
+			limit = 1,
+			excludeIds: string[] = [],
 		): Promise<GetRandomQuestionsResponse> => {
 			const searchParams = new URLSearchParams();
 			searchParams.set("themeId", themeId);
 			searchParams.set("limit", limit.toString());
+			if (excludeIds.length > 0) {
+				searchParams.set("excludeIds", excludeIds.join(","));
+			}
 
 			const response = await fetch(
 				`${API_URL}/api/question?${searchParams.toString()}`,

@@ -319,17 +319,24 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 	async findRandomByTheme(
 		themeId: string,
 		limit: number,
+		excludeIds: string[] = [],
 	): Promise<QuestionWithAnswers[]> {
+		// Build conditions
+		const conditions = [
+			eq(questionTable.themeId, themeId),
+			eq(questionTable.validated, true),
+		];
+
+		// Add exclusion condition if there are IDs to exclude
+		if (excludeIds.length > 0) {
+			conditions.push(sql`${questionTable.id} NOT IN (${sql.join(excludeIds.map(id => sql`${id}`), sql`, `)})`);
+		}
+
 		// Get random unique questions by theme
 		const questionRows = await this.db
 			.select()
 			.from(questionTable)
-			.where(
-				and(
-					eq(questionTable.themeId, themeId),
-					eq(questionTable.validated, true),
-				),
-			)
+			.where(and(...conditions))
 			.orderBy(sql`RANDOM()`)
 			.limit(limit);
 

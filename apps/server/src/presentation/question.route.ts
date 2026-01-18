@@ -16,10 +16,15 @@ export const createQuestionRoute = (
 		.get(
 			"/",
 			async ({ query, set }) => {
-				const limit = query.limit ?? 10;
+				const limit = query.limit ?? 1;
+				const excludeIds = query.excludeIds
+					? query.excludeIds.split(",").filter(Boolean)
+					: [];
+
 				const result = await getRandomQuestionsUseCase.execute({
 					themeId: query.themeId,
 					limit,
+					excludeIds,
 				});
 
 				if (result.data.length === 0) {
@@ -33,6 +38,7 @@ export const createQuestionRoute = (
 				query: t.Object({
 					themeId: t.String(),
 					limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+					excludeIds: t.Optional(t.String()),
 				}),
 			},
 		)

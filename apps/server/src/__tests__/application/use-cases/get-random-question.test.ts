@@ -64,10 +64,12 @@ describe("GetRandomQuestionsUseCase", () => {
 	beforeEach(() => {
 		mockRepository = {
 			create: mock(() => Promise.resolve(createMockQuestion("q1"))),
+			update: mock(() => Promise.resolve(null)),
 			findById: mock(() =>
 				Promise.resolve(mockQuestionsWithAnswers[0] ?? null),
 			),
 			findAll: mock(() => Promise.resolve({ data: [], total: 0 })),
+			setQuestionValidation: mock(() => Promise.resolve(createMockQuestion("q1"))),
 			findRandomByTheme: mock(() => Promise.resolve(mockQuestionsWithAnswers)),
 		};
 		useCase = new GetRandomQuestionsUseCase(mockRepository);
@@ -92,6 +94,7 @@ describe("GetRandomQuestionsUseCase", () => {
 			expect(mockRepository.findRandomByTheme).toHaveBeenCalledWith(
 				"theme-science",
 				5,
+				undefined,
 			);
 		});
 
