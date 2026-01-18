@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { getUseCases } from "../composition";
 import { createDifficultyRoutes } from "./difficulty.routes";
+import { createQuestionRoute } from "./question.route";
 import {
 	createAdminQuestionRoutes,
 	createQuestionRoutes,
@@ -13,8 +14,6 @@ import { createThemeRoutes } from "./theme.routes";
 const useCases = getUseCases();
 
 export const routes = new Elysia()
-	.use(createThemeRoutes(useCases.getThemes))
-	.use(createQuestionRoutes(useCases.createQuestion))
 	.use(
 		createAdminQuestionRoutes(
 			useCases.getQuestionById,
@@ -23,5 +22,7 @@ export const routes = new Elysia()
 			useCases.updateQuestion,
 		),
 	)
-	.use(createQuestionRoute(useCases.getRandomQuestions))
-	.use(createDifficultyRoutes(useCases.getDifficulties));
+	.use(createDifficultyRoutes(useCases.getDifficulties))
+	.use(createQuestionRoute(useCases.getRandomQuestion))
+	.use(createQuestionRoutes(useCases.createQuestion))
+	.use(createThemeRoutes(useCases.getThemes));

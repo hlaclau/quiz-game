@@ -3,8 +3,10 @@ import {
 	GetDifficultiesUseCase,
 	GetQuestionByIdUseCase,
 	GetQuestionsUseCase,
+	GetRandomQuestionsUseCase,
 	GetThemesUseCase,
 	SetQuestionValidationUseCase,
+	UpdateQuestionUseCase,
 } from "../application/use-cases";
 import {
 	createDifficultyRepository,
@@ -29,6 +31,8 @@ export const DependencyKeys = {
 		getThemes: "useCase.getThemes",
 		getDifficulties: "useCase.getDifficulties",
 		setQuestionValidation: "useCase.setQuestionValidation",
+		updateQuestion: "useCase.updateQuestion",
+		getRandomQuestions: "useCase.getRandomQuestions",
 	},
 } as const;
 
@@ -83,6 +87,18 @@ export function setupContainer(): void {
 			container.resolve(DependencyKeys.repositories.question),
 		);
 	});
+
+	container.register(DependencyKeys.useCases.updateQuestion, () => {
+		return new UpdateQuestionUseCase(
+			container.resolve(DependencyKeys.repositories.question),
+		);
+	});
+
+	container.register(DependencyKeys.useCases.getRandomQuestions, () => {
+		return new GetRandomQuestionsUseCase(
+			container.resolve(DependencyKeys.repositories.question),
+		);
+	});
 }
 
 /**
@@ -107,6 +123,12 @@ export function getUseCases() {
 		),
 		setQuestionValidation: container.resolve<SetQuestionValidationUseCase>(
 			DependencyKeys.useCases.setQuestionValidation,
+		),
+		updateQuestion: container.resolve<UpdateQuestionUseCase>(
+			DependencyKeys.useCases.updateQuestion,
+		),
+		getRandomQuestion: container.resolve<GetRandomQuestionsUseCase>(
+			DependencyKeys.useCases.getRandomQuestions,
 		),
 	};
 }

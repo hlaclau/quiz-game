@@ -89,6 +89,10 @@ export interface GetQuestionByIdResponse {
 	data: QuestionWithAnswersDTO | null;
 }
 
+export interface GetRandomQuestionsResponse {
+	data: QuestionWithAnswersDTO[];
+}
+
 /**
  * Answer input for creating a question
  */
@@ -234,6 +238,22 @@ export const api = {
 			}
 			const result = await response.json();
 			return result.data;
+		},
+		getRandom: async (
+			themeId: string,
+			limit = 10,
+		): Promise<GetRandomQuestionsResponse> => {
+			const searchParams = new URLSearchParams();
+			searchParams.set("themeId", themeId);
+			searchParams.set("limit", limit.toString());
+
+			const response = await fetch(
+				`${API_URL}/api/question?${searchParams.toString()}`,
+			);
+			if (!response.ok) {
+				throw new Error("Failed to fetch random questions");
+			}
+			return response.json();
 		},
 	},
 };
