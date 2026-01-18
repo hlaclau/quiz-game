@@ -15,7 +15,7 @@ export const createQuestionRoute = (
 	return new Elysia({ prefix: "/api/question" })
 		.get(
 			"/",
-			async ({ query, set }) => {
+			async ({ query }) => {
 				const limit = query.limit ?? 1;
 				const excludeIds = query.excludeIds
 					? query.excludeIds.split(",").filter(Boolean)
@@ -26,11 +26,6 @@ export const createQuestionRoute = (
 					limit,
 					excludeIds,
 				});
-
-				if (result.data.length === 0) {
-					set.status = 404;
-					return { error: "No questions found for this theme" };
-				}
 
 				return result;
 			},

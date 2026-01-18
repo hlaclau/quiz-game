@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Check, Timer, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -12,6 +12,7 @@ export const Route = createFileRoute("/play/$themeId")({
 });
 
 const TOTAL_QUESTIONS = 10;
+const QUESTION_TIMER_SECONDS = 10;
 
 function QuizComponent() {
 	const { themeId } = Route.useParams();
@@ -22,6 +23,7 @@ function QuizComponent() {
 	const [score, setScore] = useState(0);
 	const [isQuizComplete, setIsQuizComplete] = useState(false);
 	const [noMoreQuestions, setNoMoreQuestions] = useState(false);
+	const [timeLeft, setTimeLeft] = useState(QUESTION_TIMER_SECONDS);
 
 	const currentQuestionNumber = answeredQuestionIds.length + 1;
 
@@ -40,6 +42,24 @@ function QuizComponent() {
 
 	const currentQuestion = apiResponse?.data?.[0];
 
+	// Reset timer when new question loads
+	useEffect(() => {
+		if (currentQuestion) {
+			setTimeLeft(QUESTION_TIMER_SECONDS);
+		}
+	}, [currentQuestion?.id]);
+
+	// Timer countdown
+	useEffect(() => {
+		if (isAnswered || !currentQuestion || timeLeft <= 0) return;
+
+		const timer = setInterval(() => {
+			setTimeLeft((prev) => Math.max(0, prev - 1));
+		}, 1000);
+
+		return () => clearInterval(timer);
+	}, [isAnswered, currentQuestion, timeLeft]);
+
 	// Check if we ran out of questions from the API
 	useEffect(() => {
 		if (apiResponse?.data && apiResponse.data.length === 0) {
@@ -47,6 +67,58 @@ function QuizComponent() {
 			setIsQuizComplete(true);
 		}
 	}, [apiResponse]);
+
+	const advanceToNextQuestion = useCallback(
+		(currentId: string) => {
+			setTimeout(() => {
+				const newAnsweredIds = [...answeredQuestionIds, currentId];
+				setAnsweredQuestionIds(newAnsweredIds);
+
+				if (newAnsweredIds.length >= TOTAL_QUESTIONS) {
+					setIsQuizComplete(true);
+				} else {
+					// Reset state for next question
+					setSelectedAnswerId(null);
+					setCorrectAnswerId(null);
+					setIsAnswered(false);
+					setTimeLeft(QUESTION_TIMER_SECONDS);
+				}
+			}, 1500);
+		},
+		[answeredQuestionIds],
+	);
+
+	const handleTimeout = useCallback(async () => {
+		if (isAnswered || !currentQuestion) return;
+
+		setIsAnswered(true);
+		// No selected answer on timeout
+
+		try {
+			// Validate with the first answer just to get the correct answer ID
+			// We don't increment score on timeout
+			const firstAnswerId = currentQuestion.answers[0]?.id;
+			if (firstAnswerId) {
+				const result = await api.questions.validate(
+					currentQuestion.id,
+					firstAnswerId,
+				);
+				setCorrectAnswerId(result.correctAnswerId);
+			}
+
+			advanceToNextQuestion(currentQuestion.id);
+		} catch (error) {
+			console.error("Failed to handle timeout:", error);
+			advanceToNextQuestion(currentQuestion.id);
+		}
+	}, [isAnswered, currentQuestion, advanceToNextQuestion]);
+
+	// Trigger timeout
+	useEffect(() => {
+		if (timeLeft === 0 && !isAnswered && currentQuestion) {
+			handleTimeout();
+		}
+	}, [timeLeft, isAnswered, currentQuestion, handleTimeout]);
 
 	const handleAnswer = async (answerId: string) => {
 		if (isAnswered || !currentQuestion) return;
@@ -62,35 +134,10 @@ function QuizComponent() {
 			}
 			setCorrectAnswerId(result.correctAnswerId);
 
-			// Auto advance after delay
-			setTimeout(() => {
-				const newAnsweredIds = [...answeredQuestionIds, currentQuestion.id];
-				setAnsweredQuestionIds(newAnsweredIds);
-
-				if (newAnsweredIds.length >= TOTAL_QUESTIONS) {
-					setIsQuizComplete(true);
-				} else {
-					// Reset state for next question
-					setSelectedAnswerId(null);
-					setCorrectAnswerId(null);
-					setIsAnswered(false);
-				}
-			}, 1500);
+			advanceToNextQuestion(currentQuestion.id);
 		} catch (error) {
 			console.error("Failed to validate answer:", error);
-			// Still advance on error to not block the quiz
-			setTimeout(() => {
-				const newAnsweredIds = [...answeredQuestionIds, currentQuestion.id];
-				setAnsweredQuestionIds(newAnsweredIds);
-
-				if (newAnsweredIds.length >= TOTAL_QUESTIONS) {
-					setIsQuizComplete(true);
-				} else {
-					setSelectedAnswerId(null);
-					setCorrectAnswerId(null);
-					setIsAnswered(false);
-				}
-			}, 1500);
+			advanceToNextQuestion(currentQuestion.id);
 		}
 	};
 
@@ -153,8 +200,6 @@ function QuizComponent() {
 	}
 
 	if (!currentQuestion) {
-		// This state might happen briefly before the effect sets isQuizComplete
-		// or if the API returns empty list initially
 		return null;
 	}
 
@@ -167,8 +212,21 @@ function QuizComponent() {
 						<ArrowLeft className="size-5" />
 					</Link>
 				</Button>
-				<div className="font-medium text-muted-foreground text-sm">
-					Question {currentQuestionNumber} / {TOTAL_QUESTIONS}
+				<div className="flex items-center gap-4">
+					<div className="font-medium text-muted-foreground text-sm">
+						Question {currentQuestionNumber} / {TOTAL_QUESTIONS}
+					</div>
+					<div
+						className={cn(
+							"flex items-center gap-2 rounded-full px-3 py-1 font-medium text-sm transition-colors",
+							timeLeft <= 3
+								? "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+								: "bg-secondary text-secondary-foreground",
+						)}
+					>
+						<Timer className="size-4" />
+						<span>{timeLeft}s</span>
+					</div>
 				</div>
 				<div className="font-medium text-primary text-sm">Score: {score}</div>
 			</div>
