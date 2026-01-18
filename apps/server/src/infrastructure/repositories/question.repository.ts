@@ -329,7 +329,12 @@ export class DrizzleQuestionRepository implements IQuestionRepository {
 
 		// Add exclusion condition if there are IDs to exclude
 		if (excludeIds.length > 0) {
-			conditions.push(sql`${questionTable.id} NOT IN (${sql.join(excludeIds.map(id => sql`${id}`), sql`, `)})`);
+			conditions.push(
+				sql`${questionTable.id} NOT IN (${sql.join(
+					excludeIds.map((id) => sql`${id}`),
+					sql`, `,
+				)})`,
+			);
 		}
 
 		// Get random unique questions by theme
