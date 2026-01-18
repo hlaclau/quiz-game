@@ -1,7 +1,10 @@
 import { Elysia } from "elysia";
 import { getUseCases } from "../composition";
 import { createDifficultyRoutes } from "./difficulty.routes";
-import { createAdminQuestionRoutes, createQuestionRoutes } from "./question.routes";
+import {
+	createAdminQuestionRoutes,
+	createQuestionRoutes,
+} from "./question.routes";
 import { createThemeRoutes } from "./theme.routes";
 
 /**
