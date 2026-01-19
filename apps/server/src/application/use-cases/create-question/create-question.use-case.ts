@@ -1,5 +1,6 @@
-import { Question } from "../../../domain/entities/question";
+import type { Question } from "../../../domain/entities/question";
 import type { IQuestionRepository } from "../../../domain/interfaces/question-repository.interface";
+import { QuestionValidationService } from "../../../domain/services";
 import type { QuestionDTO } from "../../dtos/question.dto";
 import type {
 	CreateQuestionInput,
@@ -32,7 +33,10 @@ export class CreateQuestionUseCase {
 
 	async execute(input: CreateQuestionInput): Promise<CreateQuestionOutput> {
 		// Validate domain rules
-		Question.validateAnswersCount(input.answers.length);
+		QuestionValidationService.validate({
+			content: input.content,
+			answers: input.answers,
+		});
 
 		const question = await this.questionRepository.create({
 			content: input.content,

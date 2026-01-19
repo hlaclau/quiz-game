@@ -30,6 +30,7 @@ export class Question {
 
 	/**
 	 * Validates that the answers count is exactly 4
+	 * @deprecated Use QuestionValidationService.validateAnswersCount instead
 	 * @throws InvalidAnswersCountError if the count is not 4
 	 */
 	static validateAnswersCount(answersCount: number): void {

@@ -1,9 +1,9 @@
 import type { Answer } from "../../../domain/entities/answer";
-import { Question } from "../../../domain/entities/question";
 import type {
 	IQuestionRepository,
 	QuestionWithAnswers,
 } from "../../../domain/interfaces/question-repository.interface";
+import { QuestionValidationService } from "../../../domain/services";
 import type { AnswerDTO } from "../../dtos/answer.dto";
 import type {
 	QuestionWithAnswersDTO,
@@ -51,7 +51,10 @@ export class UpdateQuestionUseCase {
 
 	async execute(input: UpdateQuestionInput): Promise<UpdateQuestionOutput> {
 		// Validate domain rules
-		Question.validateAnswersCount(input.answers.length);
+		QuestionValidationService.validate({
+			content: input.content,
+			answers: input.answers,
+		});
 
 		const result = await this.questionRepository.update({
 			id: input.id,
