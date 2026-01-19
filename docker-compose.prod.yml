@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quiz-game-db-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-quizgame}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizgame}
+      POSTGRES_DB: ${POSTGRES_DB:-quizgame}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-quizgame}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Remove ports in production or use internal network only
+    # ports:
+    #   - "5432:5432"
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: quiz-game-server-prod
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: quiz-game-web-prod
+    ports:
+      - "3001:3001"
+    environment:
+      VITE_API_URL: ${API_URL:-http://server:3000}
+      NODE_ENV: production
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:
