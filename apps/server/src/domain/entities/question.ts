@@ -1,5 +1,3 @@
-import { InvalidAnswersCountError } from "../errors/domain.error";
-
 /**
  * Question Domain Entity
  * Represents a quiz question in the domain layer
@@ -26,16 +24,6 @@ export class Question {
 
 	static create(props: QuestionProps): Question {
 		return new Question(props);
-	}
-
-	/**
-	 * Validates that the answers count is exactly 4
-	 * @throws InvalidAnswersCountError if the count is not 4
-	 */
-	static validateAnswersCount(answersCount: number): void {
-		if (answersCount !== REQUIRED_ANSWERS_COUNT) {
-			throw new InvalidAnswersCountError();
-		}
 	}
 
 	get id(): string {

@@ -3,7 +3,6 @@ import {
 	Question,
 	REQUIRED_ANSWERS_COUNT,
 } from "../../../domain/entities/question";
-import { InvalidAnswersCountError } from "../../../domain/errors/domain.error";
 
 describe("Question Entity", () => {
 	const validProps = {
@@ -36,32 +35,6 @@ describe("Question Entity", () => {
 			const question = Question.create({ ...validProps, explanation: null });
 
 			expect(question.explanation).toBeNull();
-		});
-	});
-
-	describe("validateAnswersCount", () => {
-		it("should pass when answers count equals REQUIRED_ANSWERS_COUNT", () => {
-			expect(() =>
-				Question.validateAnswersCount(REQUIRED_ANSWERS_COUNT),
-			).not.toThrow();
-		});
-
-		it("should throw InvalidAnswersCountError when count is less than required", () => {
-			expect(() => Question.validateAnswersCount(3)).toThrow(
-				InvalidAnswersCountError,
-			);
-			expect(() => Question.validateAnswersCount(0)).toThrow(
-				InvalidAnswersCountError,
-			);
-		});
-
-		it("should throw InvalidAnswersCountError when count is greater than required", () => {
-			expect(() => Question.validateAnswersCount(5)).toThrow(
-				InvalidAnswersCountError,
-			);
-			expect(() => Question.validateAnswersCount(10)).toThrow(
-				InvalidAnswersCountError,
-			);
 		});
 	});
 
