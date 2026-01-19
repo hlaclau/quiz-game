@@ -1,224 +1,206 @@
-# quiz-game
+# Quiz Game 
 
-## Features
+Application de quiz full-stack moderne avec une architecture propre (DDD).
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Start** - SSR framework with TanStack Router
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Elysia** - Type-safe, high-performance framework
-- **Bun** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Biome** - Linting and formatting
-- **Turborepo** - Optimized monorepo build system
+## Aperçu
 
-## Getting Started
+Quiz Game permet de créer et jouer à des quiz sur différents thèmes. L'application propose :
 
-First, install the dependencies:
+- Authentification via SSO Discord 
+- Création de questions avec 4 réponses possibles
+- Organisation par thèmes et niveaux de difficulté
+- Interface responsive et moderne
+- Dashboard admin pour valider et modifier des questions
+
+
+## Prérequis
+
+- [Bun](https://bun.sh/) >= 1.2
+- [PostgreSQL](https://www.postgresql.org/) >= 14
+
+## Installation
 
 ```bash
+# Cloner le dépôt
+git clone git@github.com:hlaclau/quiz-game.git
+cd quiz-game
+
+# Installer les dépendances
 bun install
-```
-## Database Setup
 
-This project uses PostgreSQL with Drizzle ORM.
-
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
-
-3. Apply the schema to your database:
-```bash
+# Configurer les variables d'environement web et serveur (reprendre les .env.exemple)
+# Appliquer le schéma de base de données
 bun run db:push
 ```
 
-
-Then, run the development server:
+## Lancement
 
 ```bash
+# Développement (web + serveur)
 bun run dev
+
+# Ou séparément
+bun run dev:web      # Frontend → http://localhost:3001
+bun run dev:server   # API → http://localhost:3000
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+📚 Documentation OPENAPI disponible sur `http://localhost:3000/docs`
 
+## Stack Technique
 
+| Couche | Technologies |
+|--------|-------------|
+| **Frontend** | React 19, TypeScript, TanStack Router/Start, TailwindCSS v4, shadcn/ui |
+| **Backend** | Elysia, Bun, TypeScript |
+| **Base de données** | PostgreSQL, Drizzle ORM |
+| **Authentification** | Better-Auth (Discord OAuth) |
+| **Qualité** | Biome (format et linting), Husky (pre-commit hooks), Turborepo, GitHub Actions (lancements des tests et linter lors des pull requests) |
 
+## Architecture
 
-
-
-
-## Project Structure
+### Structure du Monorepo
 
 ```
 quiz-game/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Start)
-│   └── server/      # Backend API (Elysia)
+│   ├── web/        → Frontend React (TanStack Start)
+│   └── server/     → API Elysia (DDD)
 ├── packages/
-│   ├── auth/        # Authentication configuration & logic
-│   ├── config/      # Configuration files
-│   └── db/          # Database schema & queries
+│   ├── auth/       → Configuration Better-Auth
+│   ├── db/         → Schéma Drizzle ORM
+│   └── config/     → Config TypeScript partagée
 ```
 
-## Available Scripts
+### Architecture de l'API (DDD)
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:studio`: Open database studio UI
-- `bun run check`: Run Biome formatting and linting
+L'API suit les principes du **Domain-Driven Design** avec une séparation stricte des couches :
 
-Database Schema for dbdiagram.io:
 ```
-// ==========================================
-// AUTHENTICATION TABLES (Better Auth)
-// ==========================================
+apps/server/src/
+├── domain/           → Logique métier pure (aucune dépendance externe)
+│   ├── entities/     → Question, Answer, Theme, Difficulty
+│   ├── interfaces/   → Contrats des repositories
+│   ├── services/     → Services de validation et scoring
+│   ├── value-objects/→ Objets valeur immuables
+│   └── errors/       → Erreurs métier
+│
+├── application/      → Orchestration des cas d'usage
+│   ├── use-cases/    → Un dossier par fonctionnalité
+│   └── dtos/         → Objets de transfert de données
+│
+├── infrastructure/   → Implémentations concrètes
+│   ├── repositories/ → Repositories Drizzle
+│   └── container.ts  → Injection de dépendances
+│
+└── presentation/     → Routes HTTP Elysia
+    ├── *.routes.ts   → Points d'entrée REST
+    └── middleware/   → Middleware d'authentification
+```
 
-Table user {
-  id text [pk]
-  name text [not null]
-  email text [not null, unique]
-  email_verified boolean [not null, default: false]
-  image text
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-}
+### Règle des Dépendances
 
-Table session {
-  id text [pk]
-  expires_at timestamp [not null]
-  token text [not null, unique]
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-  ip_address text
-  user_agent text
-  user_id text [not null, ref: > user.id]
+Les dépendances pointent toujours vers l'intérieur :
 
-  indexes {
-    user_id
+```
+presentation → application → domain ← infrastructure
+```
+
+- **Domain** : Zéro dépendance externe, logique métier pure
+- **Application** : Dépend uniquement des interfaces du domain
+- **Infrastructure** : Implémente les interfaces, utilise le package DB (Drizzle)
+- **Presentation** : Relie la couche application aux endpoints de l'API
+
+## Patrons de Conception
+
+### Use-Case Pattern
+
+Chaque opération métier est encapsulée dans un use-case :
+
+```typescript
+// application/use-cases/create-question/create-question.use-case.ts
+export class CreateQuestionUseCase {
+  constructor(private readonly questionRepository: IQuestionRepository) {}
+
+  async execute(input: CreateQuestionInput): Promise<CreateQuestionOutput> {
+    Question.validateAnswersCount(input.answers.length);
+    const question = await this.questionRepository.create(input);
+    return { data: toDTO(question) };
   }
-}
-
-Table account {
-  id text [pk]
-  account_id text [not null]
-  provider_id text [not null]
-  user_id text [not null, ref: > user.id]
-  access_token text
-  refresh_token text
-  id_token text
-  access_token_expires_at timestamp
-  refresh_token_expires_at timestamp
-  scope text
-  password text
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-
-  indexes {
-    user_id
-  }
-}
-
-Table verification {
-  id text [pk]
-  identifier text [not null]
-  value text [not null]
-  expires_at timestamp [not null]
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-
-  indexes {
-    identifier
-  }
-}
-
-// ==========================================
-// QUIZ TABLES
-// ==========================================
-
-Table difficulty {
-  id text [pk]
-  name text [not null, unique, note: 'Easy, Medium, Hard']
-  level int [not null, unique, note: '1, 2, 3 for sorting']
-  color text [note: 'Hex color for UI']
-  created_at timestamp [not null, default: `now()`]
-}
-
-Table theme {
-  id text [pk]
-  name text [not null, unique]
-  description text
-  color text [note: 'Hex color for UI display']
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-}
-
-Table tag {
-  id text [pk]
-  name text [not null, unique]
-  created_at timestamp [not null, default: `now()`]
-}
-
-Table question {
-  id text [pk]
-  content text [not null, note: 'The question text']
-  explanation text [note: 'Optional explanation for the correct answer']
-  difficulty_id text [not null, ref: > difficulty.id]
-  theme_id text [not null, ref: > theme.id]
-  author_id text [not null, ref: > user.id]
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [not null, default: `now()`]
-
-  indexes {
-    difficulty_id
-    theme_id
-    author_id
-  }
-}
-
-Table answer {
-  id text [pk]
-  content text [not null]
-  is_correct boolean [not null, default: false]
-  question_id text [not null, ref: > question.id]
-  created_at timestamp [not null, default: `now()`]
-
-  indexes {
-    question_id
-  }
-}
-
-Table question_tag {
-  question_id text [not null, ref: > question.id]
-  tag_id text [not null, ref: > tag.id]
-
-  indexes {
-    (question_id, tag_id) [pk]
-  }
-}
-
-// ==========================================
-// TABLE GROUPS (for visual organization)
-// ==========================================
-
-TableGroup authentication {
-  user
-  session
-  account
-  verification
-}
-
-TableGroup quiz {
-  difficulty
-  theme
-  tag
-  question
-  answer
-  question_tag
 }
 ```
+
+### Repository Pattern
+
+L'accès aux données passe par des interfaces :
+
+```typescript
+// domain/interfaces/question-repository.interface.ts
+export interface IQuestionRepository {
+  create(input: CreateQuestionInput): Promise<Question>;
+  findById(id: string): Promise<Question | null>;
+  findAll(): Promise<Question[]>;
+}
+
+// infrastructure/repositories/question.repository.ts
+export class DrizzleQuestionRepository implements IQuestionRepository {
+  // Implémentation avec Drizzle ORM
+}
+```
+
+### Injection de Dépendances
+
+Les use-cases reçoivent leurs dépendances via le conteneur :
+
+```typescript
+// infrastructure/container.ts
+export const useCases = {
+  createQuestion: new CreateQuestionUseCase(repositories.question),
+  getThemes: new GetThemesUseCase(repositories.theme),
+};
+
+// presentation/question.routes.ts
+export const createQuestionRoutes = (useCase: CreateQuestionUseCase) => {
+  return new Elysia({ prefix: "/api/questions" })
+    .post("/", async ({ body }) => useCase.execute(body));
+};
+```
+
+## Scripts Disponibles
+
+| Commande | Description |
+|----------|-------------|
+| `bun run dev` | Lance web + serveur |
+| `bun run dev:web` | Lance le frontend (port 3001) |
+| `bun run dev:server` | Lance l'API (port 3000) |
+| `bun run build` | Build de production |
+| `bun run check` | Lint et format (Biome) |
+| `bun run check-types` | Vérification TypeScript |
+| `bun run db:push` | Applique le schéma DB |
+| `bun run db:studio` | Ouvre Drizzle Studio |
+| `bun run db:generate` | Génère les migrations |
+| `bun run db:migrate` | Exécute les migrations |
+
+## Contribuer
+
+### Workflow
+
+1. Créer une branche depuis `dev`
+2. Développer la fonctionnalité
+3. S'assurer que les checks passent : `bun run check`
+4. Lancer les tests : `bun test` (dans `apps/server`)
+5. Créer une PR vers `dev`
+
+### Ajouter une Fonctionnalité (Backend)
+
+1. **Domain** → Définir l'entité et l'interface du repository
+2. **Application** → Créer le use-case dans son dossier dédié
+3. **Infrastructure** → Implémenter le repository avec Drizzle
+4. **Container** → Enregistrer le use-case avec ses dépendances
+5. **Presentation** → Ajouter les routes qui délèguent au use-case
+
+### Conventions
+
+- **Biome** gère le formatage et le linting
+- **Interfaces** préfixées par `I` (ex: `IQuestionRepository`)
+- **Routes API** préfixées par `/api/`
+- **Commits** : conventionnal commits
