@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quiz-game-db
+    environment:
+      POSTGRES_USER: quizgame
+      POSTGRES_PASSWORD: quizgame
+      POSTGRES_DB: quizgame
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizgame"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: quiz-game-server
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://quizgame:quizgame@postgres:5432/quizgame
+      NODE_ENV: development
+      CORS_ORIGIN: http://localhost:3001
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Mount source for hot reload in dev (optional)
+      - ./apps/server/src:/app/apps/server/src
+      - ./packages:/app/packages
+    command: bun run --hot src/index.ts
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: quiz-game-web
+    ports:
+      - "3001:3001"
+    environment:
+      VITE_API_URL: http://localhost:3000
+      NODE_ENV: development
+    depends_on:
+      - server
+    volumes:
+      # Mount source for hot reload in dev (optional)
+      - ./apps/web/src:/app/apps/web/src
+      - ./packages:/app/packages
+
+volumes:
+  postgres_data:
