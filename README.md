@@ -17,6 +17,7 @@ Quiz Game permet de créer et jouer à des quiz sur différents thèmes. L'appli
 
 - [Bun](https://bun.sh/) >= 1.2
 - [PostgreSQL](https://www.postgresql.org/) >= 14
+- [Docker](https://www.docker.com/) (optionnel, pour le développement avec Docker)
 
 ## Installation
 
@@ -45,6 +46,62 @@ bun run dev:server   # API → http://localhost:3000
 ```
 
 📚 Documentation OPENAPI disponible sur `http://localhost:3000/docs`
+
+## Développement avec Docker
+
+### Prérequis Docker
+
+- Docker et Docker Compose installés
+
+### Lancement avec Docker Compose
+
+```bash
+# Lancer tous les services (PostgreSQL + Server + Web)
+docker-compose up
+
+# Lancer en arrière-plan
+docker-compose up -d
+
+# Arrêter les services
+docker-compose down
+
+# Voir les logs
+docker-compose logs -f
+
+# Reconstruire les images
+docker-compose build
+```
+
+Les services seront disponibles sur :
+- **Frontend** → http://localhost:3001
+- **API** → http://localhost:3000
+- **PostgreSQL** → localhost:5432
+
+### Configuration des variables d'environnement
+
+Créez un fichier `.env` à la racine ou configurez les variables dans `docker-compose.yml` :
+- `DISCORD_CLIENT_ID` : ID client Discord OAuth
+- `DISCORD_CLIENT_SECRET` : Secret client Discord OAuth
+- `CORS_ORIGIN` : Origine CORS autorisée (par défaut: http://localhost:3001)
+
+### Base de données
+
+La base de données PostgreSQL est automatiquement créée dans un volume Docker. Pour réinitialiser :
+
+```bash
+docker-compose down -v  # Supprime les volumes
+docker-compose up       # Recrée tout
+```
+
+### Production
+
+Pour la production, utilisez `docker-compose.prod.yml` :
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+Assurez-vous de configurer toutes les variables d'environnement nécessaires dans un fichier `.env` ou via les variables d'environnement du système.
 
 ## Stack Technique
 
