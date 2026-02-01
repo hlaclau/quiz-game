@@ -163,6 +163,22 @@ Assurez-vous de configurer toutes les variables d'environnement nécessaires dan
 
 ## Architecture
 
+### Diagrammes C4
+
+#### System Context Diagram
+![System Context Diagram](docs/system-context-diagram.png)
+
+#### Container Diagram
+![Container Diagram](docs/container-diagram.png)
+
+![Container Diagram Extra](docs/container-diagram_extra.png)
+
+#### Components Diagram
+![Components Diagram](docs/components-diagram.png)
+
+#### Code Diagram
+![Code Diagram](docs/code_diagram.png)
+
 ### Structure du Monorepo
 
 ```
