@@ -12,6 +12,54 @@ Quiz Game permet de créer et jouer à des quiz sur différents thèmes. L'appli
 - Interface responsive et moderne
 - Dashboard admin pour valider et modifier des questions
 
+## Manuel Utilisateur
+
+### Se connecter
+
+1. Accédez à l'application via `http://localhost:3001`
+2. Cliquez sur **"Connexion"** dans le menu
+3. Connectez-vous avec votre compte **Discord** (authentification SSO)
+4. Vous êtes redirigé vers votre tableau de bord
+
+### Jouer à un quiz
+
+1. Depuis la page d'accueil, cliquez sur **"Jouer"**
+2. Sélectionnez un **thème** parmi ceux proposés (ex: Sciences, Histoire, Sport...)
+3. Répondez aux questions en cliquant sur l'une des 4 réponses proposées
+4. Chaque question n'a qu'**une seule bonne réponse**
+5. Votre score est calculé en fonction :
+   - Du nombre de bonnes réponses
+   - De la difficulté des questions
+   - De votre série de bonnes réponses consécutives (streak bonus)
+
+### Soumettre une question
+
+1. Connectez-vous à votre compte
+2. Accédez à **"Proposer une question"** depuis le menu
+3. Remplissez le formulaire :
+   - **Contenu de la question** : votre question (max 500 caractères)
+   - **Thème** : choisissez la catégorie appropriée
+   - **Difficulté** : Facile, Moyen ou Difficile
+   - **4 réponses** : entrez les 4 réponses possibles
+   - **Réponse correcte** : cochez la bonne réponse (une seule)
+   - **Explication** (optionnel) : ajoutez une explication pour la bonne réponse
+4. Cliquez sur **"Soumettre"**
+5. Votre question sera soumise à validation par un administrateur
+
+### Consulter ses questions
+
+1. Accédez à votre **Dashboard**
+2. Visualisez la liste de vos questions soumises
+3. Consultez leur statut : en attente de validation, validée ou refusée
+
+### Administration (pour les admins)
+
+1. Accédez au **Dashboard administrateur**
+2. Visualisez les questions en attente de validation
+3. Pour chaque question, vous pouvez :
+   - **Valider** : la question sera disponible dans les quiz
+   - **Modifier** : corriger le contenu ou les réponses avant validation
+   - **Refuser** : la question ne sera pas publiée
 
 ## Prérequis
 
@@ -115,6 +163,22 @@ Assurez-vous de configurer toutes les variables d'environnement nécessaires dan
 
 ## Architecture
 
+### Diagrammes C4
+
+#### System Context Diagram
+![System Context Diagram](docs/system-context-diagram.png)
+
+#### Container Diagram
+![Container Diagram](docs/container-diagram.png)
+
+![Container Diagram Extra](docs/container-diagram_extra.png)
+
+#### Components Diagram
+![Components Diagram](docs/components-diagram.png)
+
+#### Code Diagram
+![Code Diagram](docs/code_diagram.png)
+
 ### Structure du Monorepo
 
 ```
@@ -167,28 +231,56 @@ presentation → application → domain ← infrastructure
 - **Infrastructure** : Implémente les interfaces, utilise le package DB (Drizzle)
 - **Presentation** : Relie la couche application aux endpoints de l'API
 
-## Patrons de Conception
+## Patrons de Conception (Design Patterns)
 
-### Use-Case Pattern
+Le projet utilise plusieurs design patterns classiques, organisés par catégorie :
 
-Chaque opération métier est encapsulée dans un use-case :
+### Patterns de Création
+
+#### Singleton Pattern
+Le conteneur IoC est implémenté comme un singleton global :
 
 ```typescript
-// application/use-cases/create-question/create-question.use-case.ts
-export class CreateQuestionUseCase {
-  constructor(private readonly questionRepository: IQuestionRepository) {}
+// composition/container.ts
+class Container {
+  private factories = new Map<string, () => unknown>();
+  private singletons = new Map<string, unknown>();
 
-  async execute(input: CreateQuestionInput): Promise<CreateQuestionOutput> {
-    Question.validateAnswersCount(input.answers.length);
-    const question = await this.questionRepository.create(input);
-    return { data: toDTO(question) };
+  singleton<T>(key: string, factory: () => T): void {
+    if (!this.singletons.has(key)) {
+      this.singletons.set(key, factory());
+    }
+  }
+
+  resolve<T>(key: string): T {
+    if (this.singletons.has(key)) {
+      return this.singletons.get(key) as T;
+    }
+    // ...
   }
 }
+
+export const container = new Container(); // Instance unique
 ```
 
-### Repository Pattern
+#### Factory Pattern
+Les repositories sont créés via des fonctions factory :
 
-L'accès aux données passe par des interfaces :
+```typescript
+// composition/adapters.ts
+export const createQuestionRepository = (): IQuestionRepository => {
+  return new DrizzleQuestionRepository(db);
+};
+
+export const createThemeRepository = (): IThemeRepository => {
+  return new DrizzleThemeRepository(db);
+};
+```
+
+### Patterns Structurels
+
+#### Adapter Pattern
+Les repositories Drizzle adaptent l'interface de la base de données aux interfaces du domaine :
 
 ```typescript
 // domain/interfaces/question-repository.interface.ts
@@ -200,26 +292,65 @@ export interface IQuestionRepository {
 
 // infrastructure/repositories/question.repository.ts
 export class DrizzleQuestionRepository implements IQuestionRepository {
-  // Implémentation avec Drizzle ORM
+  constructor(private readonly db: DrizzleClient) {}
+  // Adapte les appels Drizzle ORM vers l'interface du domaine
 }
 ```
 
-### Injection de Dépendances
-
-Les use-cases reçoivent leurs dépendances via le conteneur :
+#### Repository Pattern
+Abstraction de l'accès aux données via des interfaces :
 
 ```typescript
-// infrastructure/container.ts
-export const useCases = {
-  createQuestion: new CreateQuestionUseCase(repositories.question),
-  getThemes: new GetThemesUseCase(repositories.theme),
-};
+// Le domaine définit le contrat
+export interface IQuestionRepository {
+  create(input: CreateQuestionInput): Promise<Question>;
+  findById(id: string): Promise<Question | null>;
+}
 
-// presentation/question.routes.ts
-export const createQuestionRoutes = (useCase: CreateQuestionUseCase) => {
-  return new Elysia({ prefix: "/api/questions" })
-    .post("/", async ({ body }) => useCase.execute(body));
-};
+// L'infrastructure fournit l'implémentation
+export class DrizzleQuestionRepository implements IQuestionRepository {
+  // Implémentation concrète avec Drizzle ORM
+}
+```
+
+### Patterns Comportementaux
+
+#### Strategy Pattern
+Le service de scoring utilise une configuration injectable permettant de changer l'algorithme de calcul :
+
+```typescript
+// domain/services/quiz-scoring.service.ts
+export interface ScoringConfig {
+  basePointsPerQuestion: number;
+  streakBonusMultiplier: number;
+  maxStreakBonus: number;
+  difficultyMultipliers: Map<number, number>;
+}
+
+export class QuizScoringService {
+  constructor(private readonly config: ScoringConfig = DEFAULT_SCORING_CONFIG) {}
+
+  calculateRoundScore(results: AnswerResult[]): QuizScoreSummary {
+    // Utilise this.config pour calculer le score
+    // On peut injecter différentes stratégies de scoring
+  }
+}
+```
+
+#### Use-Case Pattern (Command)
+Chaque opération métier est encapsulée dans un use-case dédié :
+
+```typescript
+// application/use-cases/create-question/create-question.use-case.ts
+export class CreateQuestionUseCase {
+  constructor(private readonly questionRepository: IQuestionRepository) {}
+
+  async execute(input: CreateQuestionInput): Promise<CreateQuestionOutput> {
+    QuestionValidationService.validate({ content: input.content, answers: input.answers });
+    const question = await this.questionRepository.create(input);
+    return { data: toDTO(question) };
+  }
+}
 ```
 
 ## Scripts Disponibles
